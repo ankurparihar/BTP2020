@@ -1,0 +1,2 @@
+1. g++ -std=c++14 "Base_Station_Allocation(Distance).cpp" -o output.exe
+2. output
