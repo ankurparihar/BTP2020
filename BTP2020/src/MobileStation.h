@@ -8,6 +8,7 @@ class BaseStation;
 class MobileStation {
 public:
 	int id;
+	string name;
 	Point<int> location;
 	BaseStation* baseStation;
 

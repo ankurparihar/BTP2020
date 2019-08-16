@@ -9,6 +9,7 @@ class MobileStation;
 class BaseStation {
 public:
 	int id;
+	string name;
 	Point<int> location;
 	vector <MobileStation*> mobileStations;
 
