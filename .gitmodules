@@ -1,0 +1,3 @@
+[submodule "Dependencies/SDL2"]
+	path = Dependencies/SDL2
+	url = https://github.com/ankurparihar/SDL2.git
