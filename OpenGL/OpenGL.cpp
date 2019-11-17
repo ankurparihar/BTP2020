@@ -26,6 +26,11 @@ int main()
 		std::cout << "Failed to initialize GLFW" << std::endl;
 		return -1;
 	}
+	
+	/* Some properties */
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);	// Non resizable window
+	glfwWindowHint(GLFW_SAMPLES, 4);			// Hind GLFW to allocate Multi-sampling Anti-aliasing buffers
+	glEnable(GL_MULTISAMPLE);					// Enable MSAA
 
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGL tutorial", NULL, NULL);
@@ -44,7 +49,7 @@ int main()
 	}
 
 	/* Initialize ImGui layer */
-	const char* glsl_version = "#version 330";
+	const char* glsl_version = "#version 450";
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -57,21 +62,6 @@ int main()
 	// Setup Platform/Renderer bindings
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
-
-	// Load Fonts
-	// - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-	// - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-	// - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-	// - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-	// - Read 'misc/fonts/README.txt' for more instructions and details.
-	// - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-	//io.Fonts->AddFontDefault();
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-	//IM_ASSERT(font != NULL);
 
 	// Our state
 	bool show_demo_window = true;
@@ -88,13 +78,19 @@ int main()
 	std::vector<MobileStation> mobileStations = generateMobileStations(NUM_MOBILE, WINDOW_WIDTH, WINDOW_HEIGHT, BORDER);
 	/* Generate connection matrix [Station x Mobile] */
 	/* All are disconnected (0) initially */
-	std::vector<std::vector<int>> connections = generateGrid(NUM_BASE + NUM_PICO, NUM_MOBILE);
+	std::vector<std::vector<Station*>> connections = generateGrid(NUM_BASE, NUM_PICO, NUM_MOBILE);
 
-	float positions[6] = {
-		-0.5f, -0.5f,
-		 0.0f,  0.5f,
-		 0.5f, -0.5f
-	};
+	/* Connect mobiles to stations */
+	connect(mobileStations, baseStations, picoStations);
+
+	/* Print connections : cool xD*/
+	{
+		for (MobileStation mobile : mobileStations) {
+			std::cout << mobile << " -> ";
+			if (mobile.connected) std::cout << *(mobile.station) << std::endl;
+			else std::cout << "NULL" << std::endl;
+		}
+	}
 
 	float basePos[NUM_BASE * 2 * 4], picoPos[NUM_PICO * 2 * 4], mobilePos[NUM_MOBILE * 2 * 4];
 
@@ -140,7 +136,12 @@ int main()
 		picoPos[7 + (i * 8)] = (y + r);
 	}
 
-	GLuint baseBuffer, mobileBuffer, picoBuffer;
+	float linePos[4] = {
+		0.0f, 0.0f,		// line segment start x, y
+		0.0f, 0.0f		// line segment end   x, y
+	};
+
+	GLuint baseBuffer, mobileBuffer, picoBuffer, lineBuffer;
 	glGenBuffers(1, &baseBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, baseBuffer);
 	glBufferData(GL_ARRAY_BUFFER, NUM_BASE * 2 * 4 * sizeof(float), basePos, GL_STATIC_DRAW);
@@ -153,29 +154,43 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, mobileBuffer);
 	glBufferData(GL_ARRAY_BUFFER, NUM_MOBILE * 2 * 4 * sizeof(float), mobilePos, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+	glGenBuffers(1, &lineBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, lineBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(float), linePos, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 
 
-	ShaderProgramSource shaderSource = ParseShader("res/shaders/Basic.shader");
-	unsigned int shader = CreateShader(shaderSource.VertexSource, shaderSource.FragmentSource);
+	ShaderProgramSource shaderSource = ParseShader("res/shaders/StationPlotter.shader");
+	unsigned int StationPlotterShader = CreateShader(shaderSource.VertexSource, shaderSource.FragmentSource);
+	shaderSource = ParseShader("res/shaders/StationConnector.shader");
+	unsigned int StationConnectorShader = CreateShader(shaderSource.VertexSource, shaderSource.FragmentSource);
 
 	glEnableVertexAttribArray(0);
 
-	glUseProgram(shader);
-
+	glUseProgram(StationPlotterShader);
+	/* StationPlotter attributes */
 	int uniformLocation, stationColorUniformLocation, stationPerimUniformLocation, centerUniformLocation;
-	uniformLocation = glGetUniformLocation(shader, "screenSize");
+	uniformLocation = glGetUniformLocation(StationPlotterShader, "screenSize");
 	glUniform2f(uniformLocation, WINDOW_WIDTH, WINDOW_HEIGHT);
-	centerUniformLocation = glGetUniformLocation(shader, "center");
-	stationColorUniformLocation = glGetUniformLocation(shader, "stationColor");
-	stationPerimUniformLocation = glGetUniformLocation(shader, "stationRadius");
+	centerUniformLocation = glGetUniformLocation(StationPlotterShader, "center");
+	stationColorUniformLocation = glGetUniformLocation(StationPlotterShader, "stationColor");
+	stationPerimUniformLocation = glGetUniformLocation(StationPlotterShader, "stationRadius");
+
+	/* StationConnector attributes */
+	// uniformLocation = glGetUniformLocation(StationConnectorShader, "screenSize");
+	// glUniform2f(uniformLocation, WINDOW_WIDTH, WINDOW_HEIGHT);
+	unsigned int lineBeginCenterUniformLocation = glGetUniformLocation(StationConnectorShader, "center");
+	unsigned int lineLengthCenterUniformLocation = glGetUniformLocation(StationConnectorShader, "len");
 
 	/* Enable blending */
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	/* Loop until user closes the window */
+	int timer = 500000;
 	while (!glfwWindowShouldClose(window)) {
-		
+		while (timer-- > 0);
+		timer = 500000;		// create some time delay
 		/* Render here */
 		glClearColor(0.13f, 0.13f, 0.13f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -185,6 +200,25 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		/* Draw connections first */
+		glUseProgram(StationConnectorShader);
+		glBindBuffer(GL_ARRAY_BUFFER, lineBuffer);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 2 * sizeof(float), 0);
+		for (MobileStation mobile : mobileStations) {
+			if (mobile.connected) {
+				linePos[0] = (float)toGLX(mobile.location.x);
+				linePos[1] = (float)toGLY(mobile.location.y);
+				linePos[2] = (float)toGLX(mobile.station->location.x);
+				linePos[3] = (float)toGLY(mobile.station->location.y);
+				glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(float), linePos, GL_STATIC_DRAW);
+				glUniform2f(lineBeginCenterUniformLocation, (float)(mobile.location.x), (float)(mobile.location.y));
+				glUniform1f(lineLengthCenterUniformLocation, (float)(mobile.location.distance(mobile.station->location)));
+				glDrawArrays(GL_LINES, 0, 2);
+				glDrawArrays(GL_LINES, 2, 2);
+			}
+		}
+
+		glUseProgram(StationPlotterShader);
 		/* Draw Base Stations */
 		glUniform4f(stationColorUniformLocation, BS_R, BS_G, BS_B, BS_A);
 		glUniform1f(stationPerimUniformLocation, BASE_STATION_RADIUS);
@@ -230,7 +264,7 @@ int main()
 	}
 
 	/* Delete shader */
-	glDeleteProgram(shader);
+	glDeleteProgram(StationPlotterShader);
 	/* Terminate ImGui */
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();

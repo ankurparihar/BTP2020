@@ -3,6 +3,8 @@
 
 class MobileStation : public Station {
 public:
+	bool connected = false;
+	unsigned int power = 0;
 	Station* station;
 
 	MobileStation() {}
@@ -10,5 +12,8 @@ public:
 	MobileStation(const int& id, std::string name) : Station(id, name) {}
 	MobileStation(const int& id, const Point<int>& location) : Station(id, location) {}
 
-	std::ostream& operator<<(std::ostream& stream);
+	bool connect(MobileStation* mobile);
+	double powerAt(const Point<int>& p);
+	std::ostream& info(std::ostream& stream) const;
+	friend std::ostream& operator<<(std::ostream& stream, const MobileStation& station);
 };

@@ -27,4 +27,5 @@ public:
 	Point& operator/(const Point<T>& p);
 
 	inline double distance(const Point<T>& p) { return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2)); }
+	inline double squraredDist(const Point<T>& p) { return (x - p.x)*(x - p.x) + (y - p.y)*(y - p.y); }
 };

@@ -121,7 +121,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\Basic.shader">
+    <None Include="res\shaders\StationPlotter.shader">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="res\shaders\StationConnector.shader">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

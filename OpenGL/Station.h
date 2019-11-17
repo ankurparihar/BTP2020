@@ -1,6 +1,8 @@
 #pragma once
 #include "Math.h"
 
+class MobileStation;
+
 class Station {
 public:
 	int id;
@@ -12,5 +14,8 @@ public:
 	Station(int id, std::string name) : id(id), name(name) {}
 	Station(int id, const Point<int>& location) : id(id), location(location) {}
 
-	virtual std::ostream& operator<<(std::ostream& stream);
+	virtual bool connect(MobileStation* mobile) = 0;
+	virtual double powerAt(const Point<int>& p) = 0;
+	virtual std::ostream& info(std::ostream& stream) const;
+	friend std::ostream& operator<<(std::ostream& stream, const Station& station);
 };
