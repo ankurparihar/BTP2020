@@ -11,7 +11,7 @@ bool PicoStation::connect(MobileStation* mobile) {
 }
 
 double PicoStation::powerAt(const Point<int>& p) {
-	double squareDistance = location.squraredDist(p);
+	double squareDistance = location.distance(p);
 	if (squareDistance <= 1.0) return power;
 	return bias + (power / squareDistance);
 }
