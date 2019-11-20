@@ -33,7 +33,7 @@ int main()
 	glEnable(GL_MULTISAMPLE);					// Enable MSAA
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGL tutorial", NULL, NULL);
+	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Cell association simulator", NULL, NULL);
 	if (!window) {
 		glfwTerminate();
 		return -1;
