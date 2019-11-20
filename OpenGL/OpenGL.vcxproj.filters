@@ -127,5 +127,6 @@
     <None Include="res\shaders\StationConnector.shader">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

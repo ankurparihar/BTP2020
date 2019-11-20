@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Station" Collapsed="true">
+    <Position X="6.5" Y="3.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAkAAAAAACAAAEAAAAQAAAAAAAAgA=</HashCode>
+      <FileName>Station.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Point&lt;T&gt;" Collapsed="true">
+    <Position X="4.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAEAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Dummy.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BaseStation" Collapsed="true">
+    <Position X="4" Y="5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAQAQAAEAgAIAAAAAAAEAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>BaseStation.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PicoStation" Collapsed="true">
+    <Position X="9" Y="5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAQAAEAgAIAAAAAAAEAAAgAQAAAAAAAAAA=</HashCode>
+      <FileName>PicoStation.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MobileStation" Collapsed="true">
+    <Position X="6.5" Y="5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAQAAAAgIAAAAAAAAEAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>MobileStation.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="ShaderProgramSource" Collapsed="true">
+    <Position X="8.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAABA=</HashCode>
+      <FileName>Shader.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -14,6 +14,7 @@ std::vector<BaseStation> generateBaseStations(int n, int length, int width, int 
 	for (int id = 1; id <= n; ++id) {
 		v[id - 1] = BaseStation(id, Point<int>(random(border, length - 1 - border), random(border, width - 1 - border)));
 		v[id - 1].power = BASE_POWER;
+		v[id - 1].bias = 0.0;
 		// v[id - 1] = BaseStation(id, Point<int>(random(border + (((id - 1) / 2) * x), x + border + (((id - 1) / 2) * x)/*length - 1 - border*/), random(border + (((id - 1) & 1) * y), y + border + (((id - 1) & 1) * y)/*width - 1 - border*/)));
 		// v[id - 1] = BaseStation(id, Point<int>(500, 100));
 	}
@@ -25,6 +26,7 @@ std::vector<PicoStation> generatePicoStations(int n, int length, int width, int 
 	for (int id = 1; id <= n; ++id) {
 		v[id - 1] = PicoStation(id, Point<int>(random(border, length - 1 - border), random(border, width - 1 - border)));
 		v[id - 1].power = PICO_POWER;
+		v[id - 1].bias = PICO_BIAS;
 		// v[id - 1] = PicoStation(id, Point<int>(500, 100));
 	}
 	return v;

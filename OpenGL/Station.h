@@ -8,7 +8,7 @@ public:
 	int id;
 	std::string name;
 	Point<int> location;
-
+	
 	Station() {}
 	Station(int id) : id(id) {}
 	Station(int id, std::string name) : id(id), name(name) {}

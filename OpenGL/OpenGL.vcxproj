@@ -198,6 +198,7 @@
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="res\shaders\StationPlotter.shader" />
     <None Include="res\shaders\StationConnector.shader" />
   </ItemGroup>
