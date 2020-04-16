@@ -81,7 +81,7 @@ int main()
 	std::vector<std::vector<Station*>> connections = generateGrid(NUM_BASE, NUM_PICO, NUM_MOBILE);
 
 	/* Connect mobiles to stations */
-	connect(mobileStations, baseStations, picoStations);
+	connect(mobileStations, baseStations, picoStations, STARTUP_METHOD);
 
 	/* Print connections : cool xD*/
 	{
@@ -188,9 +188,22 @@ int main()
 
 	/* Loop until user closes the window */
 	int timer = 500000;
+
+	// which method to run
+	int curMethod = STARTUP_METHOD;
+	int newMethod = STARTUP_METHOD;
+
 	while (!glfwWindowShouldClose(window)) {
 		while (timer-- > 0);
 		timer = 500000;		// create some time delay
+
+		// check if there is change in method of connections
+		if (newMethod != curMethod) {
+			curMethod = newMethod;
+			disconnect(mobileStations, baseStations, picoStations);
+			connect(mobileStations, baseStations, picoStations, newMethod);
+		}
+
 		/* Render here */
 		glClearColor(0.13f, 0.13f, 0.13f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);

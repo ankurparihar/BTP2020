@@ -12,7 +12,10 @@ public:
 	MobileStation(const int& id, std::string name) : Station(id, name) {}
 	MobileStation(const int& id, const Point<int>& location) : Station(id, location) {}
 
+	std::string getInfo();
 	bool connect(MobileStation* mobile);
+	void disconnect();
+	void disconnect(MobileStation* mobile);
 	double powerAt(const Point<int>& p);
 	std::ostream& info(std::ostream& stream) const;
 	friend std::ostream& operator<<(std::ostream& stream, const MobileStation& station);

@@ -1,5 +1,9 @@
 #include "BaseStation.h"
 
+std::string BaseStation::getInfo() {
+	return "BaseStation";
+}
+
 bool BaseStation::connect(MobileStation* mobile) {
 	if (mobileStations.size() < capacity) {
 		mobileStations.push_back(mobile);
@@ -8,6 +12,28 @@ bool BaseStation::connect(MobileStation* mobile) {
 		return true;
 	}
 	return false;
+}
+
+void BaseStation::disconnect() {
+	for (MobileStation* mobile : mobileStations) {
+		mobile->connected = false;
+		mobile->station = NULL;
+	}
+	mobileStations.clear();
+}
+
+void BaseStation::disconnect(MobileStation* mobile) {
+	if (mobile->connected && mobile->station == this) {
+		mobile->connected = false;
+		mobile->station = NULL;
+	}
+	std::vector<MobileStation*> ::iterator itr;
+	for (itr = mobileStations.begin(); itr != mobileStations.end(); ++itr) {
+		if (*itr == mobile) {
+			mobileStations.erase(itr);
+			break;
+		}
+	}
 }
 
 double BaseStation::powerAt(const Point<int>& p) {

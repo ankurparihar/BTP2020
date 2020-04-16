@@ -1,5 +1,9 @@
 #include "PicoStation.h"
 
+std::string PicoStation::getInfo() {
+	return "PicoStation";
+}
+
 bool PicoStation::connect(MobileStation* mobile) {
 	if (mobileStations.size() < capacity) {
 		mobileStations.push_back(mobile);
@@ -8,6 +12,28 @@ bool PicoStation::connect(MobileStation* mobile) {
 		return true;
 	}
 	return false;
+}
+
+void PicoStation::disconnect() {
+	for (MobileStation* mobile : mobileStations) {
+		mobile->connected = false;
+		mobile->station = NULL;
+	}
+	mobileStations.clear();
+}
+
+void PicoStation::disconnect(MobileStation* mobile) {
+	if (mobile->connected && mobile->station == this) {
+		mobile->connected = false;
+		mobile->station = NULL;
+	}
+	std::vector<MobileStation*> ::iterator itr;
+	for (itr = mobileStations.begin(); itr != mobileStations.end(); ++itr) {
+		if (*itr == mobile) {
+			mobileStations.erase(itr);
+			break;
+		}
+	}
 }
 
 double PicoStation::powerAt(const Point<int>& p) {

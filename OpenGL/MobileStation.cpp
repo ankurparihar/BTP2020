@@ -1,8 +1,22 @@
 #include "MobileStation.h"
 
+std::string MobileStation::getInfo() {
+	return "MobileStation";
+}
+
 bool MobileStation::connect(MobileStation* mobile) {
 	return false;
 }
+
+void MobileStation::disconnect() {
+	if (connected) {
+		station->disconnect(this);
+	}
+}
+
+void MobileStation::disconnect(MobileStation* mobile) {
+}
+
 double MobileStation::powerAt(const Point<int>& p) {
 	double squareDistance = location.distance(p);
 	if (squareDistance <= 1.0) return power;
