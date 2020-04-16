@@ -418,6 +418,10 @@ void ImGui::ShowDemoWindow(bool* p_open)
     ShowDemoWindowColumns();
     ShowDemoWindowMisc();
 
+	ImGui::Spacing();
+	ImGui::Text("Demo options");
+	ImGui::Spacing();
+
     // End of ShowDemoWindow()
     ImGui::End();
 }

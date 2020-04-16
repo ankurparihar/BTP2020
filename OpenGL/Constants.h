@@ -26,3 +26,8 @@ const int BASE_STATION_CAPACITY = 25;
 const int BASE_POWER = 1000;	// mW
 const int PICO_POWER = 200;		// mW
 const double PICO_BIAS = 0.0;	// mW
+
+// different methods
+const int METHOD1 = 0;
+const int METHOD2 = 1;
+const int STARTUP_METHOD = METHOD1;
