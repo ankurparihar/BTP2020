@@ -71,6 +71,8 @@ Index of this file:
 #include <stdint.h>         // intptr_t
 #endif
 
+#include "../../Constants.h"
+
 #ifdef _MSC_VER
 #pragma warning (disable: 4996) // 'This function or variable may be unsafe': strcpy, strdup, sprintf, vsnprintf, sscanf, fopen
 #endif
@@ -134,6 +136,8 @@ static void ShowExampleAppCustomRendering(bool* p_open);
 static void ShowExampleMenuFile();
 
 GLFWwindow* window;
+float picoBias = PICO_BIAS;
+int lMethod = method;
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see misc/fonts/README.txt)
@@ -412,15 +416,29 @@ void ImGui::ShowDemoWindow(bool* p_open)
     }
 
     // All demo contents
-    ShowDemoWindowWidgets();
-    ShowDemoWindowLayout();
-    ShowDemoWindowPopups();
-    ShowDemoWindowColumns();
-    ShowDemoWindowMisc();
+    // ShowDemoWindowWidgets();
+    // ShowDemoWindowLayout();
+    // ShowDemoWindowPopups();
+    // ShowDemoWindowColumns();
+    // ShowDemoWindowMisc();
 
 	ImGui::Spacing();
-	ImGui::Text("Demo options");
+	ImGui::Text("Simulation options");
 	ImGui::Spacing();
+
+	ImGui::Text("Method");
+	ImGui::RadioButton("1", &method, METHOD1); ImGui::SameLine();
+	ImGui::RadioButton("2", &method, METHOD2);
+	if (lMethod != method) {
+		refresh = true;
+		lMethod = method;
+	}
+	//ImGui::Text("In imgui: %d %x", newMethod, &newMethod);
+	ImGui::SliderFloat("Pico bias", &PICO_BIAS, 0.0, 10.0);
+	if (PICO_BIAS != picoBias) {
+		refresh = true;
+		picoBias = PICO_BIAS;
+	}
 
     // End of ShowDemoWindow()
     ImGui::End();

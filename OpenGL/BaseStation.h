@@ -8,8 +8,8 @@ class MobileStation;
 class BaseStation : public Station {
 public:
 	unsigned int capacity = BASE_STATION_CAPACITY;
-	unsigned int power = 0;
-	double bias = 0.0;
+	unsigned int power = BASE_POWER;
+	double bias = BASE_BIAS;
 	std::vector <MobileStation*> mobileStations;
 
 	BaseStation() {}

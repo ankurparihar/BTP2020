@@ -1,5 +1,14 @@
 #pragma once
 
+/*
+ * Variables declared with extern keyword are global and accessible to all files
+ * There must not be value assignment to such variables in header (.h) files
+ * There must be one value assignment to such variables in cpp (.cpp) files
+ *
+ * We will use Constatnts.h file to declare and Constants.cpp file to define such variables
+
+*/
+
 const int WINDOW_WIDTH = 1366;	// Window width
 const int WINDOW_HEIGHT = 768;	// Window height
 const int BORDER = 25;			// Border of window where stations don't exists
@@ -25,9 +34,14 @@ const int BASE_STATION_CAPACITY = 25;
 // Experimental
 const int BASE_POWER = 1000;	// mW
 const int PICO_POWER = 200;		// mW
-const double PICO_BIAS = 0.0;	// mW
+const double BASE_BIAS = 0.0;	// mW
+extern float PICO_BIAS;	// mW
 
 // different methods
 const int METHOD1 = 0;
 const int METHOD2 = 1;
-const int STARTUP_METHOD = METHOD1;
+const int STARTUP_METHOD = METHOD2;
+
+// Global variables
+extern int method;
+extern bool refresh;
