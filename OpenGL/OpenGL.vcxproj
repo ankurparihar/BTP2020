@@ -162,6 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaseStation.cpp" />
+    <ClCompile Include="Constants.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="MobileStation.cpp" />
     <ClCompile Include="OpenGL.cpp" />

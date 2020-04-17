@@ -8,8 +8,8 @@ class MobileStation;
 class PicoStation : public Station {
 public:
 	unsigned int capacity = PICO_STATION_CAPACITY;
-	unsigned int power = 0;
-	double bias = 0.0;
+	unsigned int power = PICO_POWER;
+	double bias = PICO_BIAS;
 	std::vector <MobileStation*> mobileStations;
 
 	PicoStation() {}

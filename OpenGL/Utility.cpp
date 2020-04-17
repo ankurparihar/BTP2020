@@ -13,8 +13,8 @@ std::vector<BaseStation> generateBaseStations(int n, int length, int width, int 
 	std::vector<BaseStation> v(n);
 	for (int id = 1; id <= n; ++id) {
 		v[id - 1] = BaseStation(id, Point<int>(random(border, length - 1 - border), random(border, width - 1 - border)));
-		v[id - 1].power = BASE_POWER;
-		v[id - 1].bias = 0.0;
+		// v[id - 1].power = BASE_POWER;
+		// v[id - 1].bias = 0.0;
 		// v[id - 1] = BaseStation(id, Point<int>(random(border + (((id - 1) / 2) * x), x + border + (((id - 1) / 2) * x)/*length - 1 - border*/), random(border + (((id - 1) & 1) * y), y + border + (((id - 1) & 1) * y)/*width - 1 - border*/)));
 		// v[id - 1] = BaseStation(id, Point<int>(500, 100));
 	}
@@ -25,8 +25,8 @@ std::vector<PicoStation> generatePicoStations(int n, int length, int width, int 
 	std::vector<PicoStation> v(n);
 	for (int id = 1; id <= n; ++id) {
 		v[id - 1] = PicoStation(id, Point<int>(random(border, length - 1 - border), random(border, width - 1 - border)));
-		v[id - 1].power = PICO_POWER;
-		v[id - 1].bias = PICO_BIAS;
+		// v[id - 1].power = PICO_POWER;
+		// v[id - 1].bias = PICO_BIAS;
 		// v[id - 1] = PicoStation(id, Point<int>(500, 100));
 	}
 	return v;
@@ -72,6 +72,8 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 	case METHOD2:
 	{
 		std::vector<Station*> stations;
+		for (unsigned int i = 0; i < baseStations.size(); ++i) stations.push_back(&baseStations[i]);
+		for (unsigned int i = 0; i < picoStations.size(); ++i) stations.push_back(&picoStations[i]);
 		for (unsigned int i = 0; i < mobileStations.size(); ++i) {
 			mobileStations[i].connected = false;
 			mobileStations[i].station = NULL;
@@ -114,6 +116,23 @@ void disconnect(std::vector<MobileStation>& mobileStations, std::vector<BaseStat
 	}
 	for (PicoStation& pico : picoStations) {
 		pico.disconnect();
+	}
+}
+
+// This function will change assign modified variables like bias, capacity etc.
+void reconfigure(std::vector<MobileStation>& mobileStations, std::vector<BaseStation>& baseStations, std::vector<PicoStation>& picoStations) {
+	/*for (MobileStation& mobile : mobileStations) {
+		
+	}*/
+	for (BaseStation& base : baseStations) {
+		base.capacity = BASE_STATION_CAPACITY;
+		base.power = BASE_POWER;
+		base.bias = BASE_BIAS;
+	}
+	for (PicoStation& pico : picoStations) {
+		pico.capacity = PICO_STATION_CAPACITY;
+		pico.power = PICO_POWER;
+		pico.bias = PICO_BIAS;
 	}
 }
 

@@ -190,18 +190,18 @@ int main()
 	int timer = 500000;
 
 	// which method to run
-	int curMethod = STARTUP_METHOD;
-	int newMethod = STARTUP_METHOD;
+	method = STARTUP_METHOD;
 
 	while (!glfwWindowShouldClose(window)) {
 		while (timer-- > 0);
 		timer = 500000;		// create some time delay
 
 		// check if there is change in method of connections
-		if (newMethod != curMethod) {
-			curMethod = newMethod;
+		if (refresh) {
 			disconnect(mobileStations, baseStations, picoStations);
-			connect(mobileStations, baseStations, picoStations, newMethod);
+			reconfigure(mobileStations, baseStations, picoStations);
+			connect(mobileStations, baseStations, picoStations, method);
+			refresh = false;
 		}
 
 		/* Render here */

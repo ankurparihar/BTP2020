@@ -15,6 +15,7 @@ std::vector<MobileStation> generateMobileStations(int n, int length, int width, 
 std::vector<std::vector<Station*>> generateGrid(int numBase, int numPico, int numMobile);
 void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation>& baseStations, std::vector<PicoStation>& picoStations, int method);
 void disconnect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation>& baseStations, std::vector<PicoStation>& picoStations);
+void reconfigure(std::vector<MobileStation>& mobileStations, std::vector<BaseStation>& baseStations, std::vector<PicoStation>& picoStations);
 double expected_bitrate(Station* s, double presentPower, double interference, int k);
 
 float toGLX(int x);
