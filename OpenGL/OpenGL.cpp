@@ -186,15 +186,11 @@ int main()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	/* Loop until user closes the window */
-	int timer = 500000;
-
 	// which method to run
 	method = STARTUP_METHOD;
 
+	/* Loop until user closes the window */
 	while (!glfwWindowShouldClose(window)) {
-		while (timer-- > 0);
-		timer = 500000;		// create some time delay
 
 		// check if there is change in method of connections
 		if (refresh) {
@@ -227,7 +223,6 @@ int main()
 				glUniform2f(lineBeginCenterUniformLocation, (float)(mobile.location.x), (float)(mobile.location.y));
 				glUniform1f(lineLengthCenterUniformLocation, (float)(mobile.location.distance(mobile.station->location)));
 				glDrawArrays(GL_LINES, 0, 2);
-				glDrawArrays(GL_LINES, 2, 2);
 			}
 		}
 
