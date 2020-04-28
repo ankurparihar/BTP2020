@@ -16,10 +16,26 @@ public:
 	Point(const T& x, const T& y) : x(x), y(y) {}
 	Point(const Point& p) : x(p.x), y(p.y) {}
 
-	Point& operator+(const T& n);
-	Point& operator-(const T& n);
-	Point& operator*(const T& n);
-	Point& operator/(const T& n);
+	Point& operator+(const T& n) {
+		x += n;
+		y += n;
+		return *this;
+	}
+	Point& operator-(const T& n) {
+		x -= n;
+		y -= n;
+		return *this;
+	}
+	Point& operator*(const T& n) {
+		x *= n;
+		y *= n;
+		return *this;
+	}
+	Point& operator/(const T& n) {
+		x /= n;
+		y /= n;
+		return *this;
+	}
 	
 	Point& operator+(const Point<T>& p);
 	Point& operator-(const Point<T>& p);

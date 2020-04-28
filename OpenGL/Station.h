@@ -19,6 +19,7 @@ public:
 	virtual void disconnect() = 0;
 	virtual void disconnect(MobileStation* mobile) = 0;
 	virtual double powerAt(const Point<int>& p) = 0;
+	virtual double powerAtUnbiased(const Point<int>& p) = 0;
 	virtual std::ostream& info(std::ostream& stream) const;
 	friend std::ostream& operator<<(std::ostream& stream, const Station& station);
 };

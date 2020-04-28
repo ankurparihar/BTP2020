@@ -18,9 +18,15 @@ void MobileStation::disconnect(MobileStation* mobile) {
 }
 
 double MobileStation::powerAt(const Point<int>& p) {
-	double squareDistance = location.distance(p);
+	double squareDistance = location.squraredDist(p);
 	if (squareDistance <= 1.0) return power;
 	return power / squareDistance;
+}
+
+double MobileStation::powerAtUnbiased(const Point<int>& p) {
+	double squareDistance = location.squraredDist(p);
+	if (squareDistance <= 1.0) return power;
+	return (power / squareDistance);
 }
 
 std::ostream& MobileStation::info(std::ostream& stream) const {
