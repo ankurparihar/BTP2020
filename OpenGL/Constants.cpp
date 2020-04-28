@@ -2,4 +2,14 @@
 
 bool refresh = true;
 int method = STARTUP_METHOD;
-float PICO_BIAS = 4.0;
+float PICO_BIAS = 2.0;
+float MIN_POWER = 2.0;
+bool randomize = true;
+bool printConnections = false;
+int BASE_POWER = 1000000;	// mW
+int PICO_POWER = 200000;	// mW
+float avgThr[sampleSize];
+float throughputArray[5] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+float biasEffect[sampleSize];
+float biasEffectK[4][sampleSize];
+float x_data[sampleSize];

@@ -17,6 +17,7 @@ public:
 	void disconnect();
 	void disconnect(MobileStation* mobile);
 	double powerAt(const Point<int>& p);
+	double powerAtUnbiased(const Point<int>& p);
 	std::ostream& info(std::ostream& stream) const;
 	friend std::ostream& operator<<(std::ostream& stream, const MobileStation& station);
 };
