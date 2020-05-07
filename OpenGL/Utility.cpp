@@ -52,7 +52,6 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 	{
 		std::vector<Station*> stations;
 		double throughput = 0.0;
-		double bandwidth = 20.0; // MHz
 		int connected = 0;
 		//double totalPower = 0.0;
 		for (unsigned int i = 0; i < baseStations.size(); ++i) stations.push_back(&baseStations[i]);
@@ -72,7 +71,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 				double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
 				double interference = totalPower - presentPower;
 				double SINR = presentPower / interference;
-				double bitrate = (bandwidth)*log2(1 + SINR);	// Mbps (small b in Mb)
+				double bitrate = (BANDWIDTH)*log2(1 + SINR);	// Mbps (small b in Mb)
 				connected++;
 				throughput += bitrate;
 			}
@@ -90,7 +89,6 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 		for (unsigned int i = 0; i < picoStations.size(); ++i) stations.push_back(&picoStations[i]);
 		for (int loop = 0; loop < 4; ++loop) {
 			double throughput = 0.0;
-			double bandwidth = 20.0;
 			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
 				mobileStations[i].connected = false;
 				mobileStations[i].station = NULL;
@@ -123,7 +121,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 					s->connect(&mobileStations[i]);
 					double interference = totalPower - (s->powerAtUnbiased(mobileStations[i].location));
 					double SINR = (s->powerAtUnbiased(mobileStations[i].location)) / interference;
-					double bitrate = (bandwidth)*log2(1 + SINR);
+					double bitrate = (BANDWIDTH)*log2(1 + SINR);
 					throughput += bitrate;
 				}
 			}
@@ -178,12 +176,11 @@ double expected_bitrate(Station* s, double presentPower, double interference, in
 		BaseStation* bs = dynamic_cast<BaseStation*>(s);
 		double nb = bs->mobileStations.size();
 		double SINR = presentPower / interference;
-		double Bandwidth = 10;
-		double p = (Bandwidth / nb) * log2(1 + SINR);
+		double p = (BANDWIDTH / nb) * log2(1 + SINR);
 		if (nb == bs->capacity) return -1;
 		if (k == 0) return p;
 		if (k == 1) {
-			double q = (Bandwidth / bs->capacity) * log2(1 + SINR);
+			double q = (BANDWIDTH / bs->capacity) * log2(1 + SINR);
 			return q;
 		}
 		if (k == 2) {
@@ -199,12 +196,11 @@ double expected_bitrate(Station* s, double presentPower, double interference, in
 		PicoStation* ps = dynamic_cast<PicoStation*>(s);
 		double nb = ps->mobileStations.size();
 		double SINR = presentPower / interference;
-		double Bandwidth = 10;
-		double p = (Bandwidth / nb) * log2(1 + SINR);
+		double p = (BANDWIDTH / nb) * log2(1 + SINR);
 		if (nb == ps->capacity) return -1;
 		if (k == 0) return p;
 		if (k == 1) {
-			double q = (Bandwidth / ps->capacity) * log2(1 + SINR);
+			double q = (BANDWIDTH / ps->capacity) * log2(1 + SINR);
 			return q;
 		}
 		if (k == 2) {
