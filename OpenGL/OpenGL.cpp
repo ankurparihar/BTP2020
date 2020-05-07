@@ -29,7 +29,7 @@ int main()
 	
 	/* Some properties */
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);	// Non resizable window
-	glfwWindowHint(GLFW_SAMPLES, 4);			// Hind GLFW to allocate Multi-sampling Anti-aliasing buffers
+	glfwWindowHint(GLFW_SAMPLES, 4);			// Hint GLFW to allocate Multi-sampling Anti-aliasing buffers
 	glEnable(GL_MULTISAMPLE);					// Enable MSAA
 
 	/* Create a windowed mode window and its OpenGL context */
@@ -121,12 +121,12 @@ int main()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// which method to run initially
-	method = STARTUP_METHOD;
+	METHOD = STARTUP_METHOD;
 
 	// Generate x_data for output visualization
-	for (int i = 0; i < sampleSize; ++i) {
-		x_data[i] = ((float)i) / 10;
-	}
+	// for (int i = 0; i < sampleSize; ++i) {
+	// 	x_data[i] = ((float)i) / 10;
+	// }
 
 	// Output constant parameters
 	printf(
@@ -139,11 +139,13 @@ int main()
 		"Base Station Power        :     %d W\n"
 		"Pico Station Power        :     %d W\n"
 		"Bandwidth                 :     %d MHz\n"
+		"Area Dimensions           :     %d m x %d m\n"
 		"====================================================================\n\n",
 		NUM_BASE, NUM_PICO, NUM_MOBILE,
 		BASE_STATION_CAPACITY, PICO_STATION_CAPACITY,
 		BASE_POWER, PICO_POWER,
-		(int)BANDWIDTH
+		(int)BANDWIDTH,
+		WINDOW_WIDTH * SCALE, WINDOW_HEIGHT * SCALE
 	);
 
 	/* Loop until user closes the window */
@@ -221,12 +223,12 @@ int main()
 
 				// Reset histograms
 				for (int i = 0; i < sampleSize; ++i) {
-					avgThr[i] = 0.0;
+					// avgThr[i] = 0.0;
 					biasEffect[i] = 0.0;
-					biasEffectK[0][i] = 0.0;
-					biasEffectK[1][i] = 0.0;
-					biasEffectK[2][i] = 0.0;
-					biasEffectK[3][i] = 0.0;
+					// biasEffectK[0][i] = 0.0;
+					// biasEffectK[1][i] = 0.0;
+					// biasEffectK[2][i] = 0.0;
+					// biasEffectK[3][i] = 0.0;
 				}
 			}
 
@@ -235,7 +237,7 @@ int main()
 			/* Update stations' attributes */
 			reconfigure(mobileStations, baseStations, picoStations);
 			/* Connect mobiles to stations */
-			connect(mobileStations, baseStations, picoStations, method);
+			connect(mobileStations, baseStations, picoStations, METHOD);
 
 			/* Print connections : cool xD*/
 			if (printConnections) {

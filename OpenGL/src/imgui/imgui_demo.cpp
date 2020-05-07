@@ -138,7 +138,7 @@ static void ShowExampleMenuFile();
 GLFWwindow* window;
 float picoBias = PICO_BIAS;
 float minPow = MIN_POWER;
-int lMethod = method;
+int method = METHOD;
 int basePower = BASE_POWER;
 int picoPower = PICO_POWER;
 
@@ -201,47 +201,47 @@ static void ShowDemoWindowPopups();
 static void ShowDemoWindowColumns();
 static void ShowDemoWindowMisc();
 
-void drawBiasEffectK() {
-	static ImU32 colors[4] = { ImColor(255, 0, 0), ImColor(0, 255, 0), ImColor(0, 0, 255), ImColor(0, 255, 255) };
-	static uint32_t selection_start = 0, selection_length = 0;
-	static const float* y_data[] = { biasEffectK[0], biasEffectK[1], biasEffectK[2], biasEffectK[3] };
-
-	ImGui::Begin("Bias effecting K", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-	// Draw first plot with multiple sources
-	ImGui::PlotConfig conf;
-	conf.values.xs = x_data;
-	conf.values.count = sampleSize;
-	conf.values.ys_list = y_data;
-	conf.values.ys_count = 4;
-	conf.values.colors = colors;
-	conf.scale.min = 0;
-	conf.scale.max = 4000;
-	conf.tooltip.show = true;
-	conf.grid_x.show = false;
-	conf.grid_x.size = 128;
-	conf.grid_x.subticks = 16;
-	conf.grid_y.show = true;
-	conf.grid_y.size = 1000.0f;
-	conf.grid_y.subticks = 1;
-	conf.selection.show = false;
-	conf.selection.start = &selection_start;
-	conf.selection.length = &selection_length;
-	conf.frame_size = ImVec2(sampleSize * 5, 200);
-	ImGui::Plot("plot1", conf);
-
-	// // Draw second plot with the selection
-	// // reset previous values
-	// conf.values.ys_list = nullptr;
-	// conf.selection.show = true;
-	// // set new ones
-	// conf.values.ys = y_data[0];
-	// conf.values.offset = selection_start;
-	// conf.values.count = selection_length;
-	// conf.line_thickness = 2.f;
-	// ImGui::Plot("plot2", conf);
-
-	ImGui::End();
-}
+// void drawBiasEffectK() {
+// 	static ImU32 colors[4] = { ImColor(255, 0, 0), ImColor(0, 255, 0), ImColor(0, 0, 255), ImColor(0, 255, 255) };
+// 	static uint32_t selection_start = 0, selection_length = 0;
+// 	static const float* y_data[] = { biasEffectK[0], biasEffectK[1], biasEffectK[2], biasEffectK[3] };
+// 
+// 	ImGui::Begin("Bias effecting K", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+// 	// Draw first plot with multiple sources
+// 	ImGui::PlotConfig conf;
+// 	conf.values.xs = x_data;
+// 	conf.values.count = sampleSize;
+// 	conf.values.ys_list = y_data;
+// 	conf.values.ys_count = 4;
+// 	conf.values.colors = colors;
+// 	conf.scale.min = 0;
+// 	conf.scale.max = 4000;
+// 	conf.tooltip.show = true;
+// 	conf.grid_x.show = false;
+// 	conf.grid_x.size = 128;
+// 	conf.grid_x.subticks = 16;
+// 	conf.grid_y.show = true;
+// 	conf.grid_y.size = 1000.0f;
+// 	conf.grid_y.subticks = 1;
+// 	conf.selection.show = false;
+// 	conf.selection.start = &selection_start;
+// 	conf.selection.length = &selection_length;
+// 	conf.frame_size = ImVec2(sampleSize * 5, 200);
+// 	ImGui::Plot("plot1", conf);
+// 
+// 	// // Draw second plot with the selection
+// 	// // reset previous values
+// 	// conf.values.ys_list = nullptr;
+// 	// conf.selection.show = true;
+// 	// // set new ones
+// 	// conf.values.ys = y_data[0];
+// 	// conf.values.offset = selection_start;
+// 	// conf.values.count = selection_length;
+// 	// conf.line_thickness = 2.f;
+// 	// ImGui::Plot("plot2", conf);
+// 
+// 	ImGui::End();
+// }
 
 // Demonstrate most Dear ImGui features (this is big function!)
 // You may execute this function to experiment with the UI and understand what it does. You may then search for keywords in the code when you are interested by a specific feature.
@@ -472,11 +472,11 @@ void ImGui::ShowDemoWindow(bool* p_open)
 	ImGui::Spacing();
 
 	ImGui::Text("Method");
-	ImGui::RadioButton("Bias", &method, METHOD1); ImGui::SameLine();
-	ImGui::RadioButton("K", &method, METHOD2);
-	if (lMethod != method) {
+	ImGui::RadioButton("Bias", &METHOD, METHOD_BIAS); ImGui::SameLine();
+	ImGui::RadioButton("K", &METHOD, METHOD_K);
+	if (method != METHOD) {
 		refresh = true;
-		lMethod = method;
+		method = METHOD;
 	}
 
 	ImGui::Spacing();
@@ -489,10 +489,12 @@ void ImGui::ShowDemoWindow(bool* p_open)
 		basePower = BASE_POWER;
 		refresh = true;
 	}
-	ImGui::SliderFloat("Pico bias", &PICO_BIAS, 0.0, 5.0);
-	if (PICO_BIAS != picoBias) {
-		refresh = true;
-		picoBias = PICO_BIAS;
+	if (METHOD == METHOD_BIAS) {
+		ImGui::SliderFloat("Pico bias", &PICO_BIAS, 0.0, 5.0);
+		if (PICO_BIAS != picoBias) {
+			refresh = true;
+			picoBias = PICO_BIAS;
+		}
 	}
 	ImGui::SliderFloat("MIN_POWER", &MIN_POWER, 0.0, 10.0);
 	if (MIN_POWER != minPow) {
@@ -508,20 +510,13 @@ void ImGui::ShowDemoWindow(bool* p_open)
 
 	ImGui::Checkbox("print connections", &printConnections);
 	ImGui::Spacing();
-	if (method == METHOD1) {
-		// ImGui::PlotHistogram("Histogram", throughputArray, IM_ARRAYSIZE(throughputArray), 0, NULL, 0.0f, 500.0f, ImVec2(100, 100));
-		// ImGui::PlotHistogram("Bias Effect Simple", biasEffect, IM_ARRAYSIZE(biasEffect), 0, NULL, 0.0f, 800.0f, ImVec2(300, 100));
-		// ImGui::PlotHistogram("Histogram", throughputArray, IM_ARRAYSIZE(throughputArray), 0, NULL, 0.0f, 500.0f, ImVec2(100, 100));
+	if (METHOD == METHOD_BIAS) {
 		ImGui::PlotLines("Bias Effect Simple", biasEffect, IM_ARRAYSIZE(biasEffect), 0, "throughput", 0.0f, 3000.0f, ImVec2(300, 100));
-		//ImGui::PlotLines("Bias Effect Simple", avgThr, IM_ARRAYSIZE(avgThr), 0, "avg thr.", 0.0f, 100.0f, ImVec2(300, 100));
-		// ImGui::PlotMultiLines("Bias Effect K", 1, { "0" }, NULL, NULL, biasEffect, IM_ARRAYSIZE(biasEffect), 0.0f, 800.0f, ImVec2(300, 100));
 	}
-	else if (method == METHOD2) {
-		//ImGui::StyleColorsLight();
-		// generate_data();
-		drawBiasEffectK();
-		//ImGui::StyleColorsDark();
+	else if (METHOD == METHOD_K) {
+		ImGui::PlotHistogram("Histogram", throughputArray, 4, 0, NULL, 0.0f, throughputArray[4], ImVec2(300, 100));
 	}
+
     // End of ShowDemoWindow()
     ImGui::End();
 }

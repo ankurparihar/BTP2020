@@ -48,7 +48,7 @@ std::vector<std::vector<Station*>> generateGrid(int base, int pico, int mobile) 
 void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation>& baseStations, std::vector<PicoStation>& picoStations, int method) {
 	
 	switch (method) {
-	case METHOD1:
+	case METHOD_BIAS:
 	{
 		std::vector<Station*> stations;
 		double throughput = 0.0;
@@ -78,11 +78,11 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 		}
 		//throughputArray[4] = (float)throughput;
 		biasEffect[(int)(2*PICO_BIAS * 10)] = (float)throughput;
-		avgThr[(int)(2*PICO_BIAS * 10)] = (float)(throughput/connected);
+		// avgThr[(int)(2*PICO_BIAS * 10)] = (float)(throughput/connected);
 		std::cout << "Throughput\tBiasing - " << "(" << PICO_BIAS << ") " << throughput << std::endl;
 	}
 	break;
-	case METHOD2:
+	case METHOD_K:
 	{
 		std::vector<Station*> stations;
 		for (unsigned int i = 0; i < baseStations.size(); ++i) stations.push_back(&baseStations[i]);
@@ -125,10 +125,15 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 					throughput += bitrate;
 				}
 			}
-			//throughputArray[loop] = (float)throughput;
-			biasEffectK[loop][(int)(PICO_BIAS * 10)] = (float)throughput;
+			throughputArray[loop] = (float)throughput;
+			// biasEffectK[loop][(int)(PICO_BIAS * 10)] = (float)throughput;
 			std::cout << "Throughput\tk = " << loop << " - " << throughput << std::endl;
 		}
+		throughputArray[4] = throughputArray[0];
+		if (throughputArray[1] > throughputArray[4]) throughputArray[4] = throughputArray[1];
+		if (throughputArray[2] > throughputArray[4]) throughputArray[4] = throughputArray[2];
+		if (throughputArray[3] > throughputArray[4]) throughputArray[4] = throughputArray[3];
+		throughputArray[4] *= 1.75;
 	}
 	break;
 	}
