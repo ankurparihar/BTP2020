@@ -18,7 +18,7 @@ const float BS_R = 0.95f, BS_G = 0.77f, BS_B = 0.41f, BS_A = 1.0f;	// BaseStatio
 const float PS_R = 0.15f, PS_G = 0.47f, PS_B = 0.44f, PS_A = 1.0f;	// MobileStation color
 const float MS_R = 1.0f, MS_G = 1.0f, MS_B = 1.0f, MS_A = 1.0f;		// MobileStation color
 
-const int NUM_BASE = 1;
+const int NUM_BASE = 2;
 const int NUM_PICO = 5;
 const int NUM_MOBILE = 100;
 
@@ -42,6 +42,7 @@ extern float MIN_POWER;
 const int METHOD1 = 0;
 const int METHOD2 = 1;
 const int STARTUP_METHOD = METHOD1;
+const double BANDWIDTH = 20.0;	// MHz
 
 // Global variables
 extern int method;

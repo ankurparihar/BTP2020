@@ -128,6 +128,24 @@ int main()
 		x_data[i] = ((float)i) / 10;
 	}
 
+	// Output constant parameters
+	printf(
+		"============================ Parameters ============================\n"
+		"Number of Base Stations   :     %d\n"
+		"Number of Pico Stations   :     %d\n"
+		"Number of Mobile Stations :     %d\n"
+		"Base Station Capacity     :     %d\n"
+		"Pico Station Capacity     :     %d\n"
+		"Base Station Power        :     %d W\n"
+		"Pico Station Power        :     %d W\n"
+		"Bandwidth                 :     %d MHz\n"
+		"====================================================================\n\n",
+		NUM_BASE, NUM_PICO, NUM_MOBILE,
+		BASE_STATION_CAPACITY, PICO_STATION_CAPACITY,
+		BASE_POWER, PICO_POWER,
+		(int)BANDWIDTH
+	);
+
 	/* Loop until user closes the window */
 	while (!glfwWindowShouldClose(window)) {
 
@@ -135,6 +153,7 @@ int main()
 		if (refresh) {
 			refresh = false;
 			if (randomize) {
+				printf("============================ Randomized ============================\n");
 				randomize = false;
 				/* Generate randomly located base stations */
 				baseStations = generateBaseStations(NUM_BASE, WINDOW_WIDTH, WINDOW_HEIGHT, BORDER);
