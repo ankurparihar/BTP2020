@@ -13,3 +13,4 @@ float throughputArray[5] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
 float biasEffect[sampleSize];
 // float biasEffectK[4][sampleSize];
 // float x_data[sampleSize];
+bool nbPlusOne = false;

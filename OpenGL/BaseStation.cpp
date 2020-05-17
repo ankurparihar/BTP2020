@@ -18,6 +18,7 @@ void BaseStation::disconnect() {
 	for (MobileStation* mobile : mobileStations) {
 		mobile->connected = false;
 		mobile->station = NULL;
+		mobile->bitrate = 0.0;
 	}
 	mobileStations.clear();
 }
@@ -26,6 +27,7 @@ void BaseStation::disconnect(MobileStation* mobile) {
 	if (mobile->connected && mobile->station == this) {
 		mobile->connected = false;
 		mobile->station = NULL;
+		mobile->bitrate = 0.0;
 	}
 	std::vector<MobileStation*> ::iterator itr;
 	for (itr = mobileStations.begin(); itr != mobileStations.end(); ++itr) {

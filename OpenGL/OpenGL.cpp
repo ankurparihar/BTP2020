@@ -241,8 +241,8 @@ int main()
 
 			/* Print connections : cool xD*/
 			if (printConnections) {
-				for (MobileStation mobile : mobileStations) {
-					std::cout << mobile << " -> ";
+				for (MobileStation& mobile : mobileStations) {
+					std::cout << mobile << " [" << mobile.start_time << '-' << mobile.end_time << "] -> ";
 					if (mobile.connected) std::cout << *(mobile.station) << std::endl;
 					else std::cout << "NULL" << std::endl;
 				}

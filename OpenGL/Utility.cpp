@@ -72,6 +72,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 				double interference = totalPower - presentPower;
 				double SINR = presentPower / interference;
 				double bitrate = (BANDWIDTH)*log2(1 + SINR);	// Mbps (small b in Mb)
+				mobileStations[i].bitrate = bitrate;
 				connected++;
 				throughput += bitrate;
 			}
@@ -122,6 +123,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 					double interference = totalPower - (s->powerAtUnbiased(mobileStations[i].location));
 					double SINR = (s->powerAtUnbiased(mobileStations[i].location)) / interference;
 					double bitrate = (BANDWIDTH)*log2(1 + SINR);
+					mobileStations[i].bitrate = bitrate;
 					throughput += bitrate;
 				}
 			}
@@ -181,7 +183,7 @@ double expected_bitrate(Station* s, double presentPower, double interference, in
 		BaseStation* bs = dynamic_cast<BaseStation*>(s);
 		double nb = bs->mobileStations.size();
 		double SINR = presentPower / interference;
-		double p = (BANDWIDTH / nb) * log2(1 + SINR);
+		double p = (BANDWIDTH / (nb + nbPlusOne)) * log2(1 + SINR);
 		if (nb == bs->capacity) return -1;
 		if (k == 0) return p;
 		if (k == 1) {
@@ -201,7 +203,7 @@ double expected_bitrate(Station* s, double presentPower, double interference, in
 		PicoStation* ps = dynamic_cast<PicoStation*>(s);
 		double nb = ps->mobileStations.size();
 		double SINR = presentPower / interference;
-		double p = (BANDWIDTH / nb) * log2(1 + SINR);
+		double p = (BANDWIDTH / (nb + nbPlusOne)) * log2(1 + SINR);
 		if (nb == ps->capacity) return -1;
 		if (k == 0) return p;
 		if (k == 1) {

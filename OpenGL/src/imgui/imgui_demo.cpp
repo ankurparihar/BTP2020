@@ -141,6 +141,7 @@ float minPow = MIN_POWER;
 int method = METHOD;
 int basePower = BASE_POWER;
 int picoPower = PICO_POWER;
+bool nbPOne = nbPlusOne;
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see misc/fonts/README.txt)
@@ -502,11 +503,19 @@ void ImGui::ShowDemoWindow(bool* p_open)
 		minPow = MIN_POWER;
 	}
 	
-
 	if (ImGui::Button("Randomize")) {
 		randomize = true;
 		refresh = true;
 	}
+
+	ImGui::Checkbox("nb + 1", &nbPlusOne);
+	if (nbPOne != nbPlusOne) {
+		nbPOne = nbPlusOne;
+		refresh = true;
+		if (nbPlusOne) printf("nb => nb + 1\n");
+		else printf("nb + 1 => nb\n");
+	}
+
 
 	ImGui::Checkbox("print connections", &printConnections);
 	ImGui::Spacing();

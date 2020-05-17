@@ -55,3 +55,4 @@ const int sampleSize = 101;
 extern float biasEffect[sampleSize];
 // extern float biasEffectK[4][sampleSize];
 // extern float x_data[sampleSize];
+extern bool nbPlusOne;

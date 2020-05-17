@@ -6,6 +6,9 @@ public:
 	bool connected = false;
 	unsigned int power = 0;
 	Station* station;
+	int start_time = rand() % 3600;
+	int end_time = start_time + 1 + (rand() % 3600);
+	double bitrate = 0.0;
 
 	MobileStation() {}
 	MobileStation(const int& id) : Station(id) {}
