@@ -10,7 +10,6 @@ public:
 	unsigned int capacity = PICO_STATION_CAPACITY;
 	unsigned int power = PICO_POWER;
 	double bias = PICO_BIAS;
-	std::vector <MobileStation*> mobileStations;
 
 	PicoStation() {}
 	PicoStation(const int& id) : Station(id) {}
@@ -18,6 +17,7 @@ public:
 	PicoStation(const int& id, const Point<int>& location) : Station(id, location) {}
 
 	std::string getInfo();
+	bool canConnect(MobileStation* mobile);
 	bool connect(MobileStation* mobile);
 	void disconnect();
 	void disconnect(MobileStation* mobile);

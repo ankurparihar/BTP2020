@@ -10,7 +10,6 @@ public:
 	unsigned int capacity = BASE_STATION_CAPACITY;
 	unsigned int power = BASE_POWER;
 	double bias = BASE_BIAS;
-	std::vector <MobileStation*> mobileStations;
 
 	BaseStation() {}
 	BaseStation(const int& id) : Station(id) {}
@@ -18,6 +17,7 @@ public:
 	BaseStation(const int& id, const Point<int>& location) : Station(id, location) {}
 
 	std::string getInfo();
+	bool canConnect(MobileStation* mobile);
 	bool connect(MobileStation* mobile);
 	void disconnect();
 	void disconnect(MobileStation* mobile);

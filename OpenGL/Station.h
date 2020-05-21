@@ -8,6 +8,7 @@ public:
 	int id;
 	std::string name;
 	Point<int> location;
+	std::vector <MobileStation*> mobileStations;
 	
 	Station() {}
 	Station(int id) : id(id) {}
@@ -15,6 +16,7 @@ public:
 	Station(int id, const Point<int>& location) : id(id), location(location) {}
 
 	virtual std::string getInfo() = 0;
+	virtual bool canConnect(MobileStation* mobile);
 	virtual bool connect(MobileStation* mobile) = 0;
 	virtual void disconnect() = 0;
 	virtual void disconnect(MobileStation* mobile) = 0;

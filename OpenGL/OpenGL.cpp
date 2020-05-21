@@ -238,6 +238,7 @@ int main()
 			reconfigure(mobileStations, baseStations, picoStations);
 			/* Connect mobiles to stations */
 			connect(mobileStations, baseStations, picoStations, METHOD);
+			// connectWithK(mobileStations, baseStations, picoStations, METHOD);
 
 			/* Print connections : cool xD*/
 			if (printConnections) {

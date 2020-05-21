@@ -4,6 +4,10 @@ std::string PicoStation::getInfo() {
 	return "PicoStation";
 }
 
+bool PicoStation::canConnect(MobileStation* mobile) {
+	return mobileStations.size() < capacity;
+}
+
 bool PicoStation::connect(MobileStation* mobile) {
 	if (mobileStations.size() < capacity) {
 		mobileStations.push_back(mobile);

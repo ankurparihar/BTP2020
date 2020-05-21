@@ -8,6 +8,7 @@
 #include <time.h>
 #include <cmath>
 #include <algorithm>
+#include <sstream>
 #include "Constants.h"
 
 #define min(x, y) (((x)<(y)) ? (x) : (y))

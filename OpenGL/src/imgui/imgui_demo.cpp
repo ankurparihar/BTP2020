@@ -139,9 +139,11 @@ GLFWwindow* window;
 float picoBias = PICO_BIAS;
 float minPow = MIN_POWER;
 int method = METHOD;
+int k = K;
 int basePower = BASE_POWER;
 int picoPower = PICO_POWER;
 bool nbPOne = nbPlusOne;
+bool perDevice = PER_DEVICE_THROUGHPUT;
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see misc/fonts/README.txt)
@@ -497,6 +499,14 @@ void ImGui::ShowDemoWindow(bool* p_open)
 			picoBias = PICO_BIAS;
 		}
 	}
+	else if (METHOD == METHOD_K) {
+		ImGui::SliderInt("K", &K, 0, 3);
+		if (k != K) {
+			refresh = true;
+			k = K;
+		}
+	}
+
 	ImGui::SliderFloat("MIN_POWER", &MIN_POWER, 0.0, 10.0);
 	if (MIN_POWER != minPow) {
 		refresh = true;
@@ -505,6 +515,12 @@ void ImGui::ShowDemoWindow(bool* p_open)
 	
 	if (ImGui::Button("Randomize")) {
 		randomize = true;
+		refresh = true;
+	}
+
+	ImGui::Checkbox("Stats Per Device", &perDevice);
+	if (perDevice != PER_DEVICE_THROUGHPUT) {
+		PER_DEVICE_THROUGHPUT = perDevice;
 		refresh = true;
 	}
 
@@ -519,12 +535,18 @@ void ImGui::ShowDemoWindow(bool* p_open)
 
 	ImGui::Checkbox("print connections", &printConnections);
 	ImGui::Spacing();
-	if (METHOD == METHOD_BIAS) {
-		ImGui::PlotLines("Bias Effect Simple", biasEffect, IM_ARRAYSIZE(biasEffect), 0, "throughput", 0.0f, 3000.0f, ImVec2(300, 100));
-	}
-	else if (METHOD == METHOD_K) {
-		ImGui::PlotHistogram("Histogram", throughputArray, 4, 0, NULL, 0.0f, throughputArray[4], ImVec2(300, 100));
-	}
+	char maxThroughput[10];
+	snprintf(maxThroughput, 10, "%.2f", timeThroughput[TIME + 1]);
+	ImGui::PlotLines(maxThroughput , timeThroughput, IM_ARRAYSIZE(timeThroughput) - 1, 0, "avg. throughput", 0.0f, timeThroughput[TIME + 1], ImVec2(300, 100));
+	snprintf(maxThroughput, 10, "%.2f", instantThroughput[TIME + 1]);
+	ImGui::PlotLines(maxThroughput, instantThroughput, IM_ARRAYSIZE(instantThroughput) - 1, 0, "inst. throughput", 0.0f, instantThroughput[TIME + 1], ImVec2(300, 100));
+
+	// if (METHOD == METHOD_BIAS) {
+	// 	ImGui::PlotLines("Bias Effect Simple", biasEffect, IM_ARRAYSIZE(biasEffect), 0, "throughput", 0.0f, 3000.0f, ImVec2(300, 100));
+	// }
+	// else if (METHOD == METHOD_K) {
+	// 	ImGui::PlotHistogram("Histogram", throughputArray, 4, 0, NULL, 0.0f, throughputArray[4], ImVec2(300, 100));
+	// }
 
     // End of ShowDemoWindow()
     ImGui::End();

@@ -30,6 +30,11 @@ std::vector<MobileStation> generateMobileStations(int n, int lenght, int width, 
 	std::vector<MobileStation> v(n);
 	for (int id = 1; id <= n; ++id) {
 		v[id - 1] = MobileStation(id, Point<int>(random(border, lenght - 1 - border), random(border, width - 1 - border)) * SCALE);
+		int s = rand() % (TIME-1) + 1;			// s = [1, TIME-1]
+		int e = s + 1 + rand() % (TIME - s);	// e = s + 1 + [0, TIME-1-s] => [s+1, TIME]
+		v[id - 1].start_time = s;
+		v[id - 1].end_time = e;
+		v[id - 1].bitrate = 0.0;
 	}
 	return v;
 }
@@ -46,98 +51,587 @@ std::vector<std::vector<Station*>> generateGrid(int base, int pico, int mobile) 
 }
 
 void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation>& baseStations, std::vector<PicoStation>& picoStations, int method) {
-	
+	// save in buffer to print everything altogether
+	// cout prints instantenously, simulation becomes slow and unresponsive
+	// also cmd.exe has a limit of buffer it can show, so not all data is visible
+	std::stringstream ss;
+
 	switch (method) {
 	case METHOD_BIAS:
 	{
 		std::vector<Station*> stations;
-		double throughput = 0.0;
+		double totalBitsTransferred = 0.0;
+		double instantBits = 0.0;
 		int connected = 0;
+		double throughput = 0.0;
+		double averageBitsTransferred;
 		//double totalPower = 0.0;
-		for (unsigned int i = 0; i < baseStations.size(); ++i) stations.push_back(&baseStations[i]);
-		for (unsigned int i = 0; i < picoStations.size(); ++i) stations.push_back(&picoStations[i]);
-		for (unsigned int i = 0; i < mobileStations.size(); ++i) {
-			sort(stations.begin(), stations.end(), [&](Station* s1, Station* s2) {
-				return s1->powerAt(mobileStations[i].location) > s2->powerAt(mobileStations[i].location);
-			});
-			unsigned int j = 0;
-			double totalPower = 0.0;
-			for (j = 0; j < stations.size(); ++j) {
-				totalPower += stations[j]->powerAtUnbiased(mobileStations[i].location);
-			}
-			j = 0;
-			while (j < stations.size() && stations[j]->powerAt(mobileStations[i].location)>=MIN_POWER && !stations[j]->connect(&mobileStations[i])) j++;
-			if (mobileStations[i].connected) {
-				double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
-				double interference = totalPower - presentPower;
-				double SINR = presentPower / interference;
-				double bitrate = (BANDWIDTH)*log2(1 + SINR);	// Mbps (small b in Mb)
-				mobileStations[i].bitrate = bitrate;
-				connected++;
-				throughput += bitrate;
-			}
+		for (unsigned int i = 0; i < baseStations.size(); ++i) {
+			baseStations[i].mobileStations.clear();
+			stations.push_back(&baseStations[i]);
 		}
-		//throughputArray[4] = (float)throughput;
+		for (unsigned int i = 0; i < picoStations.size(); ++i) {
+			picoStations[i].mobileStations.clear();
+			stations.push_back(&picoStations[i]);
+		}
+		for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+			mobileStations[i].connected = false;
+			mobileStations[i].bitrate = 0.0;
+			mobileStations[i].station = NULL;
+		}
+
+		for (int time = 1; time <= TIME; ++time) {
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				if (mobileStations[i].start_time == time) {
+					// Connect the mobile
+					sort(stations.begin(), stations.end(), [&](Station* s1, Station* s2) {
+						return s1->powerAt(mobileStations[i].location) > s2->powerAt(mobileStations[i].location);
+					});
+					unsigned int j = 0;
+					double totalPower = 0.0;
+					for (j = 0; j < stations.size(); ++j) {
+						totalPower += stations[j]->powerAtUnbiased(mobileStations[i].location);
+					}
+					j = 0;
+					while (j < stations.size() && stations[j]->powerAt(mobileStations[i].location) >= MIN_POWER && !stations[j]->connect(&mobileStations[i])) j++;
+					if (mobileStations[i].connected) {
+						double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
+						double interference = totalPower - presentPower;
+						double SINR = presentPower / interference;
+						double tempbitrate = (BANDWIDTH)*log2(1 + SINR);	// Mbps (small b in Mb)
+						connected++;
+						// Correcting the bitrate of connected mobile of current station
+						int sizeOfStation = stations[j]->mobileStations.size();
+						for (int itr = 0; itr < sizeOfStation; ++itr) {
+							double temp = stations[j]->mobileStations[itr]->bitrate;
+							temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
+							stations[j]->mobileStations[itr]->bitrate = temp;
+						}
+						mobileStations[i].bitrate = tempbitrate/sizeOfStation;
+					}
+					else {
+						if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
+					}
+				}
+				if (mobileStations[i].end_time == time && mobileStations[i].connected) {
+					// Disconnecting the mobile
+					Station* tempStation = mobileStations[i].station;
+					tempStation->disconnect(&mobileStations[i]);
+					// Correcting the bitrate of connected mobile of current station
+					int sizeOfStation = tempStation->mobileStations.size();
+					for (int itr = 0; itr < sizeOfStation; ++itr) {
+						double temp = tempStation->mobileStations[itr]->bitrate;
+						temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
+						tempStation->mobileStations[itr]->bitrate = temp;
+					}
+				}
+			}
+			instantBits = 0.0;
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				instantBits += mobileStations[i].bitrate;
+			}
+			totalBitsTransferred += instantBits;
+
+			averageBitsTransferred = totalBitsTransferred / time;
+			ss << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
+			timeThroughput[time] = (float)averageBitsTransferred;
+			instantThroughput[time] = (float)instantBits;
+		}
+
+		timeThroughput[TIME + 1] = 0.0;
+		instantThroughput[TIME + 1] = 0.0;
+		for (int i = 1; i <= TIME; ++i) {
+			if (timeThroughput[i] > timeThroughput[TIME + 1]) timeThroughput[TIME + 1] = timeThroughput[i];
+			if (instantThroughput[i] > instantThroughput[TIME + 1]) instantThroughput[TIME + 1] = instantThroughput[i];
+		}
+		timeThroughput[TIME + 1] *= 1.75;
+		instantThroughput[TIME + 1] *= 1.75;
+
 		biasEffect[(int)(2*PICO_BIAS * 10)] = (float)throughput;
-		// avgThr[(int)(2*PICO_BIAS * 10)] = (float)(throughput/connected);
-		std::cout << "Throughput\tBiasing - " << "(" << PICO_BIAS << ") " << throughput << std::endl;
+		// ss << "Throughput\tBiasing - " << "(" << PICO_BIAS << ") " << throughput << std::endl;
 	}
 	break;
 	case METHOD_K:
 	{
 		std::vector<Station*> stations;
+		double throughput = 0.0;
 		for (unsigned int i = 0; i < baseStations.size(); ++i) stations.push_back(&baseStations[i]);
 		for (unsigned int i = 0; i < picoStations.size(); ++i) stations.push_back(&picoStations[i]);
 		for (int loop = 0; loop < 4; ++loop) {
-			double throughput = 0.0;
-			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
-				mobileStations[i].connected = false;
-				mobileStations[i].station = NULL;
-			}
 
-			for (unsigned int i = 0; i < picoStations.size(); ++i) {
-				picoStations[i].mobileStations.clear();
-			}
+			double totalBitsTransferred = 0.0;
+			double instantBits = 0.0;
+			
 			for (unsigned int i = 0; i < baseStations.size(); ++i) {
 				baseStations[i].mobileStations.clear();
 			}
-
+			for (unsigned int i = 0; i < picoStations.size(); ++i) {
+				picoStations[i].mobileStations.clear();
+			}
 			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
-				double totalPower = 0;
-				for (unsigned int j = 0; j < stations.size(); j++) {
-					totalPower += stations[j]->powerAtUnbiased(mobileStations[i].location);
-				}
-				double mini = INT_MIN;
-				Station* s = NULL;
-				for (unsigned int j = 0; j < stations.size(); j++) {
-					double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
-					double interference = totalPower - presentPower;
-					double bitRate = expected_bitrate(stations[j], presentPower, interference, loop);
-					if (mini < bitRate) {
-						mini = bitRate;
-						s = stations[j];
+				mobileStations[i].connected = false;
+				mobileStations[i].bitrate = 0.0;
+				mobileStations[i].station = NULL;
+			}
+
+			for (int time = 1; time <= TIME; ++time) {
+				for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+					if (mobileStations[i].start_time == time) {
+						// Connecting the mobile
+						double totalPower = 0;
+						for (unsigned int j = 0; j < stations.size(); ++j) {
+							totalPower += stations[j]->powerAtUnbiased(mobileStations[i].location);
+						}
+						double mini = INT_MIN;
+						Station *s = NULL;
+						for (unsigned int j = 0; j < stations.size(); ++j) {
+							if (stations[j]->canConnect(&mobileStations[i])) {
+								double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
+								double interference = totalPower - presentPower;
+								double bitRate = expected_bitrate(stations[j], presentPower, interference, loop);
+								if (mini < bitRate && bitRate>0.0) {
+									mini = bitRate;
+									s = stations[j];
+								}
+							}
+						}
+						if (s != nullptr) {
+							s->connect(&mobileStations[i]);
+							double interference = totalPower - (s->powerAtUnbiased(mobileStations[i].location));
+							double SINR = (s->powerAtUnbiased(mobileStations[i].location)) / interference;
+							double tempbitrate = (BANDWIDTH)*log2(1 + SINR);
+							// Correcting the bitrate of connected mobile of current station
+							int sizeOfStation = s->mobileStations.size();
+							for (int itr = 0; itr < sizeOfStation - 1; ++itr) {
+								double temp = s->mobileStations[itr]->bitrate;
+								temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
+								s->mobileStations[itr]->bitrate = temp;
+							}
+							mobileStations[i].bitrate = tempbitrate / sizeOfStation;
+						}
+						else {
+							if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
+						}
+					}
+					if (mobileStations[i].end_time == time && mobileStations[i].connected) {
+						// Disconnecting the mobile
+						Station* tempStation = mobileStations[i].station;
+						tempStation->disconnect(&mobileStations[i]);
+						int sizeOfStation = tempStation->mobileStations.size();
+						for (int itr = 0; itr < sizeOfStation; ++itr) {
+							double temp = tempStation->mobileStations[itr]->bitrate;
+							temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
+							tempStation->mobileStations[itr]->bitrate = temp;
+						}
 					}
 				}
-				if (s != nullptr) {
-					s->connect(&mobileStations[i]);
-					double interference = totalPower - (s->powerAtUnbiased(mobileStations[i].location));
-					double SINR = (s->powerAtUnbiased(mobileStations[i].location)) / interference;
-					double bitrate = (BANDWIDTH)*log2(1 + SINR);
-					mobileStations[i].bitrate = bitrate;
-					throughput += bitrate;
+
+				instantBits = 0.0;
+				for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+					instantBits += mobileStations[i].bitrate;
 				}
+				totalBitsTransferred += instantBits;
+
+				double averageBitsTransferred = totalBitsTransferred / time;
+				ss << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
+				timeThroughput[time] = (float)averageBitsTransferred;
+				instantThroughput[time] = (float)instantBits;
 			}
-			throughputArray[loop] = (float)throughput;
-			// biasEffectK[loop][(int)(PICO_BIAS * 10)] = (float)throughput;
-			std::cout << "Throughput\tk = " << loop << " - " << throughput << std::endl;
 		}
-		throughputArray[4] = throughputArray[0];
-		if (throughputArray[1] > throughputArray[4]) throughputArray[4] = throughputArray[1];
-		if (throughputArray[2] > throughputArray[4]) throughputArray[4] = throughputArray[2];
-		if (throughputArray[3] > throughputArray[4]) throughputArray[4] = throughputArray[3];
-		throughputArray[4] *= 1.75;
+		// will show for only last loop
+		timeThroughput[TIME + 1] = 0.0;
+		instantThroughput[TIME + 1] = 0.0;
+		for (int i = 1; i <= TIME; ++i) {
+			if (timeThroughput[i] > timeThroughput[TIME + 1]) timeThroughput[TIME + 1] = timeThroughput[i];
+			if (instantThroughput[i] > instantThroughput[TIME + 1]) instantThroughput[TIME + 1] = instantThroughput[i];
+		}
+		timeThroughput[TIME + 1] *= 1.75;
+		instantThroughput[TIME + 1] *= 1.75;
 	}
 	break;
+	}
+
+	std::ofstream file;
+	file.open("result.txt");
+	file << ss.rdbuf();
+	ss.str("");
+}
+
+// Have freedom to analyze result for every K, K will be picked from globals
+void connectWithK(std::vector<MobileStation>& mobileStations, std::vector<BaseStation>& baseStations, std::vector<PicoStation>& picoStations, int method) {
+
+	switch (method) {
+	case METHOD_BIAS:
+	{
+		std::vector<Station*> stations;
+		double totalBitsTransferred = 0.0;
+		double instantBits = 0.0;
+		int connected = 0;
+		double throughput = 0.0;
+		double averageBitsTransferred;
+		//double totalPower = 0.0;
+		for (unsigned int i = 0; i < baseStations.size(); ++i) {
+			baseStations[i].mobileStations.clear();
+			stations.push_back(&baseStations[i]);
+		}
+		for (unsigned int i = 0; i < picoStations.size(); ++i) {
+			picoStations[i].mobileStations.clear();
+			stations.push_back(&picoStations[i]);
+		}
+		for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+			mobileStations[i].connected = false;
+			mobileStations[i].bitrate = 0.0;
+			mobileStations[i].station = NULL;
+		}
+
+		for (int time = 1; time <= TIME; ++time) {
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				if (mobileStations[i].start_time == time) {
+					// Connect the mobile
+					sort(stations.begin(), stations.end(), [&](Station* s1, Station* s2) {
+						return s1->powerAt(mobileStations[i].location) > s2->powerAt(mobileStations[i].location);
+					});
+					unsigned int j = 0;
+					double totalPower = 0.0;
+					for (j = 0; j < stations.size(); ++j) {
+						totalPower += stations[j]->powerAtUnbiased(mobileStations[i].location);
+					}
+					j = 0;
+					while (j < stations.size() && stations[j]->powerAt(mobileStations[i].location) >= MIN_POWER && !stations[j]->connect(&mobileStations[i])) j++;
+					if (mobileStations[i].connected) {
+						double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
+						double interference = totalPower - presentPower;
+						double SINR = presentPower / interference;
+						double tempbitrate = (BANDWIDTH)*log2(1 + SINR);	// Mbps (small b in Mb)
+						connected++;
+						// Correcting the bitrate of connected mobile of current station
+						int sizeOfStation = stations[j]->mobileStations.size();
+						for (int itr = 0; itr < sizeOfStation; ++itr) {
+							double temp = stations[j]->mobileStations[itr]->bitrate;
+							temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
+							stations[j]->mobileStations[itr]->bitrate = temp;
+						}
+						mobileStations[i].bitrate = tempbitrate / sizeOfStation;
+					}
+					else {
+						if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
+					}
+				}
+				if (mobileStations[i].end_time == time && mobileStations[i].connected) {
+					// Disconnecting the mobile
+					connected--;
+					Station* tempStation = mobileStations[i].station;
+					tempStation->disconnect(&mobileStations[i]);
+					// Correcting the bitrate of connected mobile of current station
+					int sizeOfStation = tempStation->mobileStations.size();
+					for (int itr = 0; itr < sizeOfStation; ++itr) {
+						double temp = tempStation->mobileStations[itr]->bitrate;
+						temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
+						tempStation->mobileStations[itr]->bitrate = temp;
+					}
+				}
+			}
+
+			instantBits = 0.0;
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				instantBits += mobileStations[i].bitrate;
+			}
+			totalBitsTransferred += instantBits;
+
+			averageBitsTransferred = totalBitsTransferred / time;
+			//std::cout << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
+			
+			timeThroughput[time] = (float)averageBitsTransferred;
+			instantThroughput[time] = (float)instantBits;
+			if (PER_DEVICE_THROUGHPUT && connected > 0) {
+				instantThroughput[time] /= connected;
+			}
+		}
+
+		timeThroughput[TIME + 1] = 0.0;
+		instantThroughput[TIME + 1] = 0.0;
+		for (int i = 1; i <= TIME; ++i) {
+			if (timeThroughput[i] > timeThroughput[TIME + 1]) timeThroughput[TIME + 1] = timeThroughput[i];
+			if (instantThroughput[i] > instantThroughput[TIME + 1]) instantThroughput[TIME + 1] = instantThroughput[i];
+		}
+		timeThroughput[TIME + 1] *= 1.75;
+		instantThroughput[TIME + 1] *= 1.75;
+
+		biasEffect[(int)(2 * PICO_BIAS * 10)] = (float)throughput;
+		std::cout << "toal Bits Transferred\tBiasing = " << PICO_BIAS << " - " << totalBitsTransferred << std::endl;
+	}
+	break;
+	case METHOD_K:
+	{
+		std::vector<Station*> stations;
+		double totalBitsTransferred = 0.0;
+		double instantBits = 0.0;
+		double throughput = 0.0;
+		int connected = 0;
+		for (unsigned int i = 0; i < baseStations.size(); ++i) stations.push_back(&baseStations[i]);
+		for (unsigned int i = 0; i < picoStations.size(); ++i) stations.push_back(&picoStations[i]);
+
+		for (unsigned int i = 0; i < baseStations.size(); ++i) {
+			baseStations[i].mobileStations.clear();
+		}
+		for (unsigned int i = 0; i < picoStations.size(); ++i) {
+			picoStations[i].mobileStations.clear();
+		}
+		for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+			mobileStations[i].connected = false;
+			mobileStations[i].bitrate = 0.0;
+			mobileStations[i].station = NULL;
+		}
+
+		for (int time = 1; time <= TIME; ++time) {
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				if (mobileStations[i].start_time == time) {
+					// Connecting the mobile
+					double totalPower = 0;
+					for (unsigned int j = 0; j < stations.size(); ++j) {
+						totalPower += stations[j]->powerAtUnbiased(mobileStations[i].location);
+					}
+					double mini = INT_MIN;
+					Station *s = NULL;
+					for (unsigned int j = 0; j < stations.size(); ++j) {
+						if (stations[j]->canConnect(&mobileStations[i])) {
+							double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
+							double interference = totalPower - presentPower;
+							double bitRate = expected_bitrate(stations[j], presentPower, interference, K);
+							if (mini < bitRate && bitRate>0.0) {
+								mini = bitRate;
+								s = stations[j];
+							}
+						}
+					}
+					if (s != nullptr) {
+						s->connect(&mobileStations[i]);
+						connected++;
+						double interference = totalPower - (s->powerAtUnbiased(mobileStations[i].location));
+						double SINR = (s->powerAtUnbiased(mobileStations[i].location)) / interference;
+						double tempbitrate = (BANDWIDTH)*log2(1 + SINR);
+						// Correcting the bitrate of connected mobile of current station
+						int sizeOfStation = s->mobileStations.size();
+						for (int itr = 0; itr < sizeOfStation - 1; ++itr) {
+							double temp = s->mobileStations[itr]->bitrate;
+							temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
+							s->mobileStations[itr]->bitrate = temp;
+						}
+						mobileStations[i].bitrate = tempbitrate / sizeOfStation;
+					}
+					else {
+						if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
+					}
+				}
+				if (mobileStations[i].end_time == time && mobileStations[i].connected) {
+					// Disconnecting the mobile
+					connected--;
+					Station* tempStation = mobileStations[i].station;
+					tempStation->disconnect(&mobileStations[i]);
+					int sizeOfStation = tempStation->mobileStations.size();
+					for (int itr = 0; itr < sizeOfStation; ++itr) {
+						double temp = tempStation->mobileStations[itr]->bitrate;
+						temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
+						tempStation->mobileStations[itr]->bitrate = temp;
+					}
+				}
+			}
+
+			instantBits = 0.0;
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				instantBits += mobileStations[i].bitrate;
+			}
+			totalBitsTransferred += instantBits;
+
+			double averageBitsTransferred = totalBitsTransferred / time;
+			//std::cout << "average Bits Transferred\tk = " << K << " - " << averageBitsTransferred << std::endl;
+			
+			timeThroughput[time] = (float)averageBitsTransferred;
+			instantThroughput[time] = (float)instantBits;
+			if (PER_DEVICE_THROUGHPUT && connected > 0) {
+				instantThroughput[time] /= connected;
+			}
+		}
+		
+		std::cout << "toal Bits Transferred\tk = " << K << " - " << totalBitsTransferred << std::endl;
+
+		timeThroughput[TIME + 1] = 0.0;
+		instantThroughput[TIME + 1] = 0.0;
+		for (int i = 1; i <= TIME; ++i) {
+			if (timeThroughput[i] > timeThroughput[TIME + 1]) timeThroughput[TIME + 1] = timeThroughput[i];
+			if (instantThroughput[i] > instantThroughput[TIME + 1]) instantThroughput[TIME + 1] = instantThroughput[i];
+		}
+		timeThroughput[TIME + 1] *= 1.75;
+		instantThroughput[TIME + 1] *= 1.75;
+	}
+	break;
+	}
+}
+
+
+// Highly toxic method - Do Not Touch
+// Timing will be moved outside (OpenGL.cpp), K will be picked from globals
+// Will become easy to visualize, smooth simulation
+void connectInteractive(std::vector<MobileStation>& mobileStations, std::vector<BaseStation>& baseStations, std::vector<PicoStation>& picoStations, int method, int time) {
+	if (time > 0 && time <= TIME) {
+		refresh = true;
+		switch (method) {
+		case METHOD_BIAS:
+		{
+			std::vector<Station*> stations;
+			double totalBitsTransferred = 0.0;
+			int connected = 0;
+			double throughput = 0.0;
+			double averageBitsTransferred;
+			//double totalPower = 0.0;
+			for (unsigned int i = 0; i < baseStations.size(); ++i) {
+				baseStations[i].mobileStations.clear();
+				stations.push_back(&baseStations[i]);
+			}
+			for (unsigned int i = 0; i < picoStations.size(); ++i) {
+				picoStations[i].mobileStations.clear();
+				stations.push_back(&picoStations[i]);
+			}
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				mobileStations[i].connected = false;
+				mobileStations[i].bitrate = 0.0;
+				mobileStations[i].station = NULL;
+			}
+
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				if (mobileStations[i].start_time == time) {
+					// Connect the mobile
+					sort(stations.begin(), stations.end(), [&](Station* s1, Station* s2) {
+						return s1->powerAt(mobileStations[i].location) > s2->powerAt(mobileStations[i].location);
+					});
+					unsigned int j = 0;
+					double totalPower = 0.0;
+					for (j = 0; j < stations.size(); ++j) {
+						totalPower += stations[j]->powerAtUnbiased(mobileStations[i].location);
+					}
+					j = 0;
+					while (j < stations.size() && stations[j]->powerAt(mobileStations[i].location) >= MIN_POWER && !stations[j]->connect(&mobileStations[i])) j++;
+					if (mobileStations[i].connected) {
+						double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
+						double interference = totalPower - presentPower;
+						double SINR = presentPower / interference;
+						double tempbitrate = (BANDWIDTH)*log2(1 + SINR);	// Mbps (small b in Mb)
+						connected++;
+						// Correcting the bitrate of connected mobile of current station
+						int sizeOfStation = stations[j]->mobileStations.size();
+						for (int itr = 0; itr < sizeOfStation; ++itr) {
+							double temp = stations[j]->mobileStations[itr]->bitrate;
+							temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
+							stations[j]->mobileStations[itr]->bitrate = temp;
+						}
+						mobileStations[i].bitrate = tempbitrate / sizeOfStation;
+					}
+				}
+				if (mobileStations[i].end_time == time) {
+					// Disconnecting the mobile
+					Station* tempStation = mobileStations[i].station;
+					tempStation->disconnect(&mobileStations[i]);
+					// Correcting the bitrate of connected mobile of current station
+					int sizeOfStation = tempStation->mobileStations.size();
+					for (int itr = 0; itr < sizeOfStation; ++itr) {
+						double temp = tempStation->mobileStations[itr]->bitrate;
+						temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
+						tempStation->mobileStations[itr]->bitrate = temp;
+					}
+				}
+			}
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				totalBitsTransferred += mobileStations[i].bitrate;
+			}
+			averageBitsTransferred = totalBitsTransferred / time;
+			std::cout << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
+
+			//throughputArray[4] = (float)throughput;
+			biasEffect[(int)(2 * PICO_BIAS * 10)] = (float)throughput;
+			// avgThr[(int)(2*PICO_BIAS * 10)] = (float)(throughput/connected);
+			std::cout << "Throughput\tBiasing - " << "(" << PICO_BIAS << ") " << throughput << std::endl;
+		}
+		break;
+		case METHOD_K:
+		{
+			std::vector<Station*> stations;
+			double totalBitsTransferred = 0.0;
+			double throughput = 0.0;
+			for (unsigned int i = 0; i < baseStations.size(); ++i) stations.push_back(&baseStations[i]);
+			for (unsigned int i = 0; i < picoStations.size(); ++i) stations.push_back(&picoStations[i]);
+			for (unsigned int i = 0; i < baseStations.size(); ++i) {
+				baseStations[i].mobileStations.clear();
+			}
+			for (unsigned int i = 0; i < picoStations.size(); ++i) {
+				picoStations[i].mobileStations.clear();
+			}
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				mobileStations[i].connected = false;
+				mobileStations[i].bitrate = 0.0;
+				mobileStations[i].station = NULL;
+			}
+
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				if (mobileStations[i].start_time == time) {
+					// Connecting the mobile
+					double totalPower = 0;
+					for (unsigned int j = 0; j < stations.size(); ++j) {
+						totalPower += stations[j]->powerAtUnbiased(mobileStations[i].location);
+					}
+					double mini = INT_MIN;
+					Station *s = NULL;
+					for (unsigned int j = 0; j < stations.size(); ++j) {
+						if (stations[j]->canConnect(&mobileStations[i])) {
+							double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
+							double interference = totalPower - presentPower;
+							double bitRate = expected_bitrate(stations[j], presentPower, interference, K);
+							if (mini < bitRate && bitRate>0.0) {
+								mini = bitRate;
+								s = stations[j];
+							}
+						}
+					}
+					if (s != nullptr) {
+						s->connect(&mobileStations[i]);
+						double interference = totalPower - (s->powerAtUnbiased(mobileStations[i].location));
+						double SINR = (s->powerAtUnbiased(mobileStations[i].location)) / interference;
+						double tempbitrate = (BANDWIDTH)*log2(1 + SINR);
+						// Correcting the bitrate of connected mobile of current station
+						int sizeOfStation = s->mobileStations.size();
+						for (int itr = 0; itr < sizeOfStation - 1; ++itr) {
+							double temp = s->mobileStations[itr]->bitrate;
+							temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
+							s->mobileStations[itr]->bitrate = temp;
+						}
+						mobileStations[i].bitrate = tempbitrate / sizeOfStation;
+					}
+				}
+				if (mobileStations[i].end_time == time) {
+					// Disconnecting the mobile
+					Station* tempStation = mobileStations[i].station;
+					tempStation->disconnect(&mobileStations[i]);
+					int sizeOfStation = tempStation->mobileStations.size();
+					for (int itr = 0; itr < sizeOfStation; ++itr) {
+						double temp = tempStation->mobileStations[itr]->bitrate;
+						temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
+						tempStation->mobileStations[itr]->bitrate = temp;
+					}
+				}
+			}
+			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				totalBitsTransferred += mobileStations[i].bitrate;
+			}
+			double averageBitsTransferred = totalBitsTransferred / time;
+			std::cout << "average Bits Transferred\tk = " << K << " - " << averageBitsTransferred << std::endl;
+
+			// throughputArray[4] = throughputArray[0];
+			// if (throughputArray[1] > throughputArray[4]) throughputArray[4] = throughputArray[1];
+			// if (throughputArray[2] > throughputArray[4]) throughputArray[4] = throughputArray[2];
+			// if (throughputArray[3] > throughputArray[4]) throughputArray[4] = throughputArray[3];
+			// throughputArray[4] *= 1.75;
+		}
+		break;
+		}
 	}
 }
 

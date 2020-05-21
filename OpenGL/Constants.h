@@ -41,14 +41,17 @@ extern float MIN_POWER;		// W
 // different methods
 const int METHOD_BIAS = 0;
 const int METHOD_K = 1;
-const int STARTUP_METHOD = METHOD_BIAS;
+const int STARTUP_METHOD = METHOD_K;
 const double BANDWIDTH = 20.0;	// MHz
+const int TIME = 3600;
 
-// Global variables
+// Mutable variables
 extern int METHOD;
+extern int K;
 extern bool refresh;
 extern bool randomize;
 extern bool printConnections;
+extern bool PER_DEVICE_THROUGHPUT;
 extern float throughputArray[5];
 const int sampleSize = 101;
 // extern float avgThr[sampleSize];
@@ -56,3 +59,5 @@ extern float biasEffect[sampleSize];
 // extern float biasEffectK[4][sampleSize];
 // extern float x_data[sampleSize];
 extern bool nbPlusOne;
+extern float timeThroughput[TIME + 2];
+extern float instantThroughput[TIME + 2];

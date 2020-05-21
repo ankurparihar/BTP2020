@@ -4,6 +4,10 @@ std::string BaseStation::getInfo() {
 	return "BaseStation";
 }
 
+bool BaseStation::canConnect(MobileStation* mobile) {
+	return mobileStations.size() < capacity;
+}
+
 bool BaseStation::connect(MobileStation* mobile) {
 	if (mobileStations.size() < capacity) {
 		mobileStations.push_back(mobile);
