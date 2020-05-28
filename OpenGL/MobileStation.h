@@ -6,6 +6,7 @@ public:
 	bool connected = false;
 	unsigned int power = 0;
 	Station* station;
+	int initial_start_time;
 	int start_time;
 	int end_time;
 	double bitrate = 0.0;

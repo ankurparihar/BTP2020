@@ -32,6 +32,7 @@ std::vector<MobileStation> generateMobileStations(int n, int lenght, int width, 
 		v[id - 1] = MobileStation(id, Point<int>(random(border, lenght - 1 - border), random(border, width - 1 - border)) * SCALE);
 		int s = rand() % (TIME-1) + 1;			// s = [1, TIME-1]
 		int e = s + 1 + rand() % (TIME - s);	// e = s + 1 + [0, TIME-1-s] => [s+1, TIME]
+		v[id - 1].initial_start_time = s;
 		v[id - 1].start_time = s;
 		v[id - 1].end_time = e;
 		v[id - 1].bitrate = 0.0;
@@ -75,6 +76,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 			stations.push_back(&picoStations[i]);
 		}
 		for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+			mobileStations[i].start_time = mobileStations[i].initial_start_time;
 			mobileStations[i].connected = false;
 			mobileStations[i].bitrate = 0.0;
 			mobileStations[i].station = NULL;
@@ -133,10 +135,12 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 			totalBitsTransferred += instantBits;
 
 			averageBitsTransferred = totalBitsTransferred / time;
-			ss << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
+			// ss << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
 			timeThroughput[time] = (float)averageBitsTransferred;
 			instantThroughput[time] = (float)instantBits;
 		}
+
+		std::cout << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
 
 		timeThroughput[TIME + 1] = 0.0;
 		instantThroughput[TIME + 1] = 0.0;
@@ -160,6 +164,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 		for (int loop = 0; loop < 4; ++loop) {
 
 			double totalBitsTransferred = 0.0;
+			double averageBitsTransferred = 0.0;
 			double instantBits = 0.0;
 			
 			for (unsigned int i = 0; i < baseStations.size(); ++i) {
@@ -169,6 +174,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 				picoStations[i].mobileStations.clear();
 			}
 			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+				mobileStations[i].start_time = mobileStations[i].initial_start_time;
 				mobileStations[i].connected = false;
 				mobileStations[i].bitrate = 0.0;
 				mobileStations[i].station = NULL;
@@ -232,11 +238,14 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 				}
 				totalBitsTransferred += instantBits;
 
-				double averageBitsTransferred = totalBitsTransferred / time;
-				ss << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
+				averageBitsTransferred = totalBitsTransferred / time;
+				// ss << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
 				timeThroughput[time] = (float)averageBitsTransferred;
 				instantThroughput[time] = (float)instantBits;
 			}
+
+			std::cout << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
+
 		}
 		// will show for only last loop
 		timeThroughput[TIME + 1] = 0.0;
@@ -279,6 +288,7 @@ void connectWithK(std::vector<MobileStation>& mobileStations, std::vector<BaseSt
 			stations.push_back(&picoStations[i]);
 		}
 		for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+			mobileStations[i].start_time = mobileStations[i].initial_start_time;
 			mobileStations[i].connected = false;
 			mobileStations[i].bitrate = 0.0;
 			mobileStations[i].station = NULL;
@@ -378,6 +388,7 @@ void connectWithK(std::vector<MobileStation>& mobileStations, std::vector<BaseSt
 			picoStations[i].mobileStations.clear();
 		}
 		for (unsigned int i = 0; i < mobileStations.size(); ++i) {
+			mobileStations[i].start_time = mobileStations[i].initial_start_time;
 			mobileStations[i].connected = false;
 			mobileStations[i].bitrate = 0.0;
 			mobileStations[i].station = NULL;
