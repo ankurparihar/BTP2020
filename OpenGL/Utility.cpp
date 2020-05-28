@@ -30,11 +30,11 @@ std::vector<MobileStation> generateMobileStations(int n, int lenght, int width, 
 	std::vector<MobileStation> v(n);
 	for (int id = 1; id <= n; ++id) {
 		v[id - 1] = MobileStation(id, Point<int>(random(border, lenght - 1 - border), random(border, width - 1 - border)) * SCALE);
-		int s = rand() % (TIME-1) + 1;			// s = [1, TIME-1]
-		int e = s + 1 + rand() % (TIME - s);	// e = s + 1 + [0, TIME-1-s] => [s+1, TIME]
-		v[id - 1].initial_start_time = s;
-		v[id - 1].start_time = s;
-		v[id - 1].end_time = e;
+		//int s = rand() % (TIME-1) + 1;			// s = [1, TIME-1]
+		//int e = s + 1 + rand() % (TIME - s);	// e = s + 1 + [0, TIME-1-s] => [s+1, TIME]
+		v[id - 1].initial_start_time = 1;
+		v[id - 1].start_time = 1;
+		v[id - 1].end_time = 3600;
 		v[id - 1].bitrate = 0.0;
 	}
 	return v;
@@ -103,16 +103,17 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 						double tempbitrate = (BANDWIDTH)*log2(1 + SINR);	// Mbps (small b in Mb)
 						connected++;
 						// Correcting the bitrate of connected mobile of current station
-						int sizeOfStation = stations[j]->mobileStations.size();
-						for (int itr = 0; itr < sizeOfStation; ++itr) {
-							double temp = stations[j]->mobileStations[itr]->bitrate;
-							temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
-							stations[j]->mobileStations[itr]->bitrate = temp;
-						}
-						mobileStations[i].bitrate = tempbitrate/sizeOfStation;
+						// int sizeOfStation = stations[j]->mobileStations.size();
+						// for (int itr = 0; itr < sizeOfStation; ++itr) {
+						// 	double temp = stations[j]->mobileStations[itr]->bitrate;
+						// 	temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
+						// 	stations[j]->mobileStations[itr]->bitrate = temp;
+						// }
+						// mobileStations[i].bitrate = tempbitrate/sizeOfStation;
+						mobileStations[i].bitrate = tempbitrate;
 					}
 					else {
-						if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
+						// if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
 					}
 				}
 				if (mobileStations[i].end_time == time && mobileStations[i].connected) {
@@ -120,12 +121,12 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 					Station* tempStation = mobileStations[i].station;
 					tempStation->disconnect(&mobileStations[i]);
 					// Correcting the bitrate of connected mobile of current station
-					int sizeOfStation = tempStation->mobileStations.size();
-					for (int itr = 0; itr < sizeOfStation; ++itr) {
-						double temp = tempStation->mobileStations[itr]->bitrate;
-						temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
-						tempStation->mobileStations[itr]->bitrate = temp;
-					}
+					// int sizeOfStation = tempStation->mobileStations.size();
+					// for (int itr = 0; itr < sizeOfStation; ++itr) {
+					// 	double temp = tempStation->mobileStations[itr]->bitrate;
+					// 	temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
+					// 	tempStation->mobileStations[itr]->bitrate = temp;
+					// }
 				}
 			}
 			instantBits = 0.0;
@@ -207,28 +208,29 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 							double SINR = (s->powerAtUnbiased(mobileStations[i].location)) / interference;
 							double tempbitrate = (BANDWIDTH)*log2(1 + SINR);
 							// Correcting the bitrate of connected mobile of current station
-							int sizeOfStation = s->mobileStations.size();
-							for (int itr = 0; itr < sizeOfStation - 1; ++itr) {
-								double temp = s->mobileStations[itr]->bitrate;
-								temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
-								s->mobileStations[itr]->bitrate = temp;
-							}
-							mobileStations[i].bitrate = tempbitrate / sizeOfStation;
+							// int sizeOfStation = s->mobileStations.size();
+							// for (int itr = 0; itr < sizeOfStation - 1; ++itr) {
+							// 	double temp = s->mobileStations[itr]->bitrate;
+							// 	temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
+							// 	s->mobileStations[itr]->bitrate = temp;
+							// }
+							// mobileStations[i].bitrate = tempbitrate / sizeOfStation;
+							mobileStations[i].bitrate = tempbitrate;
 						}
 						else {
-							if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
+							// if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
 						}
 					}
 					if (mobileStations[i].end_time == time && mobileStations[i].connected) {
 						// Disconnecting the mobile
 						Station* tempStation = mobileStations[i].station;
 						tempStation->disconnect(&mobileStations[i]);
-						int sizeOfStation = tempStation->mobileStations.size();
-						for (int itr = 0; itr < sizeOfStation; ++itr) {
-							double temp = tempStation->mobileStations[itr]->bitrate;
-							temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
-							tempStation->mobileStations[itr]->bitrate = temp;
-						}
+						// int sizeOfStation = tempStation->mobileStations.size();
+						// for (int itr = 0; itr < sizeOfStation; ++itr) {
+						// 	double temp = tempStation->mobileStations[itr]->bitrate;
+						// 	temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
+						// 	tempStation->mobileStations[itr]->bitrate = temp;
+						// }
 					}
 				}
 

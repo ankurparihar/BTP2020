@@ -15,6 +15,6 @@ float throughputArray[5] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
 float biasEffect[sampleSize];
 // float biasEffectK[4][sampleSize];
 // float x_data[sampleSize];
-bool nbPlusOne = false;
+bool nbPlusOne = true;
 float timeThroughput[TIME + 2] = {0.0};
 float instantThroughput[TIME + 2] = {0.0};
