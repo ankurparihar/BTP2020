@@ -52,10 +52,6 @@ std::vector<std::vector<Station*>> generateGrid(int base, int pico, int mobile) 
 }
 
 void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation>& baseStations, std::vector<PicoStation>& picoStations, int method) {
-	// save in buffer to print everything altogether
-	// cout prints instantenously, simulation becomes slow and unresponsive
-	// also cmd.exe has a limit of buffer it can show, so not all data is visible
-	// std::stringstream ss;
 
 	switch (method) {
 	case METHOD_BIAS:
@@ -143,10 +139,10 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 			// ss << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
 			timeThroughput[time] = (float)averageBitsTransferred;
 			instantThroughput[time] = (float)instantBits;
-			if (time == 1) std::cout << "Connected Bias: " << connected << std::endl;
 		}
 
-		std::cout << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
+		txt << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
+		csv << averageBitsTransferred << ',';
 
 		timeThroughput[TIME + 1] = 0.0;
 		instantThroughput[TIME + 1] = 0.0;
@@ -159,6 +155,8 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 
 		biasEffect[(int)(2*PICO_BIAS * 10)] = (float)throughput;
 		// ss << "Throughput\tBiasing - " << "(" << PICO_BIAS << ") " << throughput << std::endl;
+		METHOD = METHOD_K;
+		refresh = true;
 	}
 	break;
 	case METHOD_K:
@@ -256,11 +254,10 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 				// ss << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
 				timeThroughput[time] = (float)averageBitsTransferred;
 				instantThroughput[time] = (float)instantBits;
-				if (time == 1) std::cout << "Connected K" << loop << ": " << connected << std::endl;
 			}
 
-			std::cout << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
-
+			txt << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
+			csv << averageBitsTransferred << ((loop == 3) ? '\n' : ',');
 		}
 		// will show for only last loop
 		timeThroughput[TIME + 1] = 0.0;
@@ -271,6 +268,9 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 		}
 		timeThroughput[TIME + 1] *= 1.75;
 		instantThroughput[TIME + 1] *= 1.75;
+		METHOD = METHOD_BIAS;
+		refresh = true;
+		randomize = true;
 	}
 	break;
 	}

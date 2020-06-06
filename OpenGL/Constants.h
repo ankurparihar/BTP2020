@@ -1,5 +1,5 @@
 #pragma once
-
+#include <sstream>
 /*
  * Variables declared with extern keyword are global and accessible to all files
  * There must not be value assignment to such variables in header (.h) files
@@ -61,3 +61,10 @@ extern float biasEffect[sampleSize];
 extern bool nbPlusOne;
 extern float timeThroughput[TIME + 2];
 extern float instantThroughput[TIME + 2];
+
+// save in buffer to print everything altogether
+// cout prints instantenously, simulation becomes slow and unresponsive
+// also cmd.exe has a limit of buffer it can show, so not all data is visible
+extern std::stringstream txt;
+extern std::stringstream csv;
+extern int simulationCount;

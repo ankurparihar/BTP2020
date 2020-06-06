@@ -18,3 +18,7 @@ float biasEffect[sampleSize];
 bool nbPlusOne = true;
 float timeThroughput[TIME + 2] = {0.0};
 float instantThroughput[TIME + 2] = {0.0};
+
+std::stringstream txt;
+std::stringstream csv;
+int simulationCount = 0;

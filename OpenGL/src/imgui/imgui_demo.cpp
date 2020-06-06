@@ -528,8 +528,14 @@ void ImGui::ShowDemoWindow(bool* p_open)
 	if (nbPOne != nbPlusOne) {
 		nbPOne = nbPlusOne;
 		refresh = true;
-		if (nbPlusOne) printf("nb => nb + 1\n");
-		else printf("nb + 1 => nb\n");
+		if (nbPlusOne) {
+			printf("nb => nb + 1\n");
+			txt << "nb => nb + 1\n";
+		}
+		else {
+			printf("nb + 1 => nb\n");
+			txt << "nb + 1 => nb\n";
+		}
 	}
 
 
