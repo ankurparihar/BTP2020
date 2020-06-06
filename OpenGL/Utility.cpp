@@ -12,7 +12,6 @@ int random(int x, int y) {
 std::vector<BaseStation> generateBaseStations(int n, int length, int width, int border) {
 	std::vector<BaseStation> v(n);
 	for (int id = 1; id <= n; ++id) {
-		;
 		v[id - 1] = BaseStation(id, Point<int>(random(border, length - 1 - border), random(border, width - 1 - border)) * SCALE);
 	}
 	return v;
@@ -97,7 +96,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 						totalPower += stations[j]->powerAtUnbiased(mobileStations[i].location);
 					}
 					j = 0;
-					while (j < stations.size() && stations[j]->powerAt(mobileStations[i].location) >= MIN_POWER && !stations[j]->connect(&mobileStations[i])) j++;
+					while (j < stations.size() && !stations[j]->connect(&mobileStations[i])) j++;
 					if (mobileStations[i].connected) {
 						double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
 						double interference = totalPower - presentPower;
@@ -144,6 +143,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 			// ss << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
 			timeThroughput[time] = (float)averageBitsTransferred;
 			instantThroughput[time] = (float)instantBits;
+			if (time == 1) std::cout << "Connected Bias: " << connected << std::endl;
 		}
 
 		std::cout << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
@@ -165,10 +165,11 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 	{
 		std::vector<Station*> stations;
 		double throughput = 0.0;
+		int connected;
 		for (unsigned int i = 0; i < baseStations.size(); ++i) stations.push_back(&baseStations[i]);
 		for (unsigned int i = 0; i < picoStations.size(); ++i) stations.push_back(&picoStations[i]);
 		for (int loop = 0; loop < 4; ++loop) {
-
+			connected = 0;
 			double totalBitsTransferred = 0.0;
 			double averageBitsTransferred = 0.0;
 			double instantBits = 0.0;
@@ -215,6 +216,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 							double SINR = (s->powerAtUnbiased(mobileStations[i].location)) / interference;
 							double tempbitrate;
 							mobileStations[i].interference = interference;
+							connected++;
 							// Correcting the bitrate of connected mobile of current station
 							int sizeOfStation = s->mobileStations.size();
 							for (int itr = 0; itr < sizeOfStation; ++itr) {
@@ -254,6 +256,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 				// ss << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
 				timeThroughput[time] = (float)averageBitsTransferred;
 				instantThroughput[time] = (float)instantBits;
+				if (time == 1) std::cout << "Connected K" << loop << ": " << connected << std::endl;
 			}
 
 			std::cout << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
