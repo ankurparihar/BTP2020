@@ -507,11 +507,11 @@ void ImGui::ShowDemoWindow(bool* p_open)
 		}
 	}
 
-	ImGui::SliderFloat("MIN_POWER", &MIN_POWER, 0.0, 10.0);
-	if (MIN_POWER != minPow) {
-		refresh = true;
-		minPow = MIN_POWER;
-	}
+	// ImGui::SliderFloat("MIN_POWER", &MIN_POWER, 0.0, 10.0);
+	// if (MIN_POWER != minPow) {
+	// 	refresh = true;
+	// 	minPow = MIN_POWER;
+	// }
 	
 	if (ImGui::Button("Randomize")) {
 		randomize = true;
