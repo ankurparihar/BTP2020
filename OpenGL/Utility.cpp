@@ -36,6 +36,7 @@ std::vector<MobileStation> generateMobileStations(int n, int lenght, int width, 
 		v[id - 1].start_time = 1;
 		v[id - 1].end_time = 3600;
 		v[id - 1].bitrate = 0.0;
+		v[id - 1].interference = INT_MAX;
 	}
 	return v;
 }
@@ -55,7 +56,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 	// save in buffer to print everything altogether
 	// cout prints instantenously, simulation becomes slow and unresponsive
 	// also cmd.exe has a limit of buffer it can show, so not all data is visible
-	std::stringstream ss;
+	// std::stringstream ss;
 
 	switch (method) {
 	case METHOD_BIAS:
@@ -80,6 +81,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 			mobileStations[i].connected = false;
 			mobileStations[i].bitrate = 0.0;
 			mobileStations[i].station = NULL;
+			mobileStations[i].interference = INT_MAX;
 		}
 
 		for (int time = 1; time <= TIME; ++time) {
@@ -100,17 +102,18 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 						double presentPower = stations[j]->powerAtUnbiased(mobileStations[i].location);
 						double interference = totalPower - presentPower;
 						double SINR = presentPower / interference;
-						double tempbitrate = (BANDWIDTH)*log2(1 + SINR);	// Mbps (small b in Mb)
+						double tempbitrate;	// Mbps (small b in Mb)
+						mobileStations[i].interference = interference;
 						connected++;
 						// Correcting the bitrate of connected mobile of current station
-						// int sizeOfStation = stations[j]->mobileStations.size();
-						// for (int itr = 0; itr < sizeOfStation; ++itr) {
-						// 	double temp = stations[j]->mobileStations[itr]->bitrate;
-						// 	temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
-						// 	stations[j]->mobileStations[itr]->bitrate = temp;
-						// }
-						// mobileStations[i].bitrate = tempbitrate/sizeOfStation;
-						mobileStations[i].bitrate = tempbitrate;
+						int sizeOfStation = stations[j]->mobileStations.size();
+						for (int itr = 0; itr < sizeOfStation; ++itr) {
+							presentPower = stations[j]->powerAtUnbiased(stations[j]->mobileStations[itr]->location);
+							interference = stations[j]->mobileStations[itr]->interference;
+							SINR = presentPower / interference;
+							tempbitrate = (BANDWIDTH / sizeOfStation)*log2(1 + SINR);
+							stations[j]->mobileStations[itr]->bitrate = tempbitrate;
+						}
 					}
 					else {
 						// if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
@@ -121,12 +124,14 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 					Station* tempStation = mobileStations[i].station;
 					tempStation->disconnect(&mobileStations[i]);
 					// Correcting the bitrate of connected mobile of current station
-					// int sizeOfStation = tempStation->mobileStations.size();
-					// for (int itr = 0; itr < sizeOfStation; ++itr) {
-					// 	double temp = tempStation->mobileStations[itr]->bitrate;
-					// 	temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
-					// 	tempStation->mobileStations[itr]->bitrate = temp;
-					// }
+					int sizeOfStation = tempStation->mobileStations.size();
+					for (int itr = 0; itr < sizeOfStation; ++itr) {
+						double presentPower = tempStation->powerAtUnbiased(tempStation->mobileStations[itr]->location);
+						double interference = tempStation->mobileStations[itr]->interference;
+						double SINR = presentPower / interference;
+						double tempbitrate = (BANDWIDTH / sizeOfStation)*log2(1 + SINR);
+						tempStation->mobileStations[itr]->bitrate = tempbitrate;
+					}
 				}
 			}
 			instantBits = 0.0;
@@ -179,6 +184,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 				mobileStations[i].connected = false;
 				mobileStations[i].bitrate = 0.0;
 				mobileStations[i].station = NULL;
+				mobileStations[i].interference = INT_MAX;
 			}
 
 			for (int time = 1; time <= TIME; ++time) {
@@ -204,18 +210,20 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 						}
 						if (s != nullptr) {
 							s->connect(&mobileStations[i]);
-							double interference = totalPower - (s->powerAtUnbiased(mobileStations[i].location));
+							double presentPower = s->powerAtUnbiased(mobileStations[i].location);
+							double interference = totalPower - presentPower;
 							double SINR = (s->powerAtUnbiased(mobileStations[i].location)) / interference;
-							double tempbitrate = (BANDWIDTH)*log2(1 + SINR);
+							double tempbitrate;
+							mobileStations[i].interference = interference;
 							// Correcting the bitrate of connected mobile of current station
-							// int sizeOfStation = s->mobileStations.size();
-							// for (int itr = 0; itr < sizeOfStation - 1; ++itr) {
-							// 	double temp = s->mobileStations[itr]->bitrate;
-							// 	temp = (temp*(sizeOfStation - 1)) / sizeOfStation;
-							// 	s->mobileStations[itr]->bitrate = temp;
-							// }
-							// mobileStations[i].bitrate = tempbitrate / sizeOfStation;
-							mobileStations[i].bitrate = tempbitrate;
+							int sizeOfStation = s->mobileStations.size();
+							for (int itr = 0; itr < sizeOfStation; ++itr) {
+								presentPower = s->powerAtUnbiased(s->mobileStations[itr]->location);
+								interference = s->mobileStations[itr]->interference;
+								SINR = presentPower / interference;
+								tempbitrate = (BANDWIDTH / sizeOfStation)*log2(1 + SINR);
+								s->mobileStations[itr]->bitrate = tempbitrate;
+							}
 						}
 						else {
 							// if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
@@ -225,12 +233,14 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 						// Disconnecting the mobile
 						Station* tempStation = mobileStations[i].station;
 						tempStation->disconnect(&mobileStations[i]);
-						// int sizeOfStation = tempStation->mobileStations.size();
-						// for (int itr = 0; itr < sizeOfStation; ++itr) {
-						// 	double temp = tempStation->mobileStations[itr]->bitrate;
-						// 	temp = (temp*(sizeOfStation + 1)) / sizeOfStation;
-						// 	tempStation->mobileStations[itr]->bitrate = temp;
-						// }
+						int sizeOfStation = tempStation->mobileStations.size();
+						for (int itr = 0; itr < sizeOfStation; ++itr) {
+							double presentPower = tempStation->powerAtUnbiased(tempStation->mobileStations[itr]->location);
+							double interference = tempStation->mobileStations[itr]->interference;
+							double SINR = presentPower / interference;
+							double tempbitrate = (BANDWIDTH / sizeOfStation)*log2(1 + SINR);
+							tempStation->mobileStations[itr]->bitrate = tempbitrate;
+						}
 					}
 				}
 
@@ -262,10 +272,10 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 	break;
 	}
 
-	std::ofstream file;
-	file.open("result.txt");
-	file << ss.rdbuf();
-	ss.str("");
+	// std::ofstream file;
+	// file.open("result.txt");
+	// file << ss.rdbuf();
+	// ss.str("");
 }
 
 // Have freedom to analyze result for every K, K will be picked from globals

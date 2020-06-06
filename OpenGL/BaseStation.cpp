@@ -32,6 +32,7 @@ void BaseStation::disconnect(MobileStation* mobile) {
 		mobile->connected = false;
 		mobile->station = NULL;
 		mobile->bitrate = 0.0;
+		mobile->interference = INT_MAX;
 	}
 	std::vector<MobileStation*> ::iterator itr;
 	for (itr = mobileStations.begin(); itr != mobileStations.end(); ++itr) {
