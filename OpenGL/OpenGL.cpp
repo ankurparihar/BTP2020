@@ -69,6 +69,7 @@ int main()
 
 	/* Print OpenGL version */
 	std::cout << glGetString(GL_VERSION) << ' ' << glGetString(GL_VENDOR) << std::endl;
+	txt << glGetString(GL_VERSION) << ' ' << glGetString(GL_VENDOR) << std::endl;
 
 	/* Generate randomly located base stations */
 	std::vector<BaseStation> baseStations = generateBaseStations(NUM_BASE, WINDOW_WIDTH, WINDOW_HEIGHT, BORDER);
@@ -147,6 +148,19 @@ int main()
 		(int)BANDWIDTH,
 		WINDOW_WIDTH * SCALE, WINDOW_HEIGHT * SCALE
 	);
+	txt << "============================ Parameters ============================\n";
+	txt << "Number of Base Stations   :     " << NUM_BASE << std::endl;
+	txt << "Number of Pico Stations   :     " << NUM_PICO << std::endl;
+	txt << "Number of Mobile Stations :     " << NUM_MOBILE << std::endl;
+	txt << "Base Station Capacity     :     " << BASE_STATION_CAPACITY << std::endl;
+	txt << "Pico Station Capacity     :     " << PICO_STATION_CAPACITY << std::endl;
+	txt << "Base Station Power        :     " << BASE_POWER << " W\n";
+	txt << "Pico Station Power        :     " << PICO_POWER << " W\n";
+	txt << "Bandwidth                 :     " << (int)BANDWIDTH << " MHz\n";
+	txt << "Area Dimensions           :     " << WINDOW_WIDTH * SCALE << " m x " << WINDOW_HEIGHT * SCALE << " m\n";
+	txt << "====================================================================\n\n";
+	
+	csv << "Bias,K0,K1,K2,K3\n";
 
 	/* Loop until user closes the window */
 	while (!glfwWindowShouldClose(window)) {
@@ -155,7 +169,8 @@ int main()
 		if (refresh) {
 			refresh = false;
 			if (randomize) {
-				printf("============================ Randomized ============================\n");
+				printf("Simulation Count: %d\r", simulationCount++);
+				txt << "============================ Randomized ============================\n";
 				randomize = false;
 				/* Generate randomly located base stations */
 				baseStations = generateBaseStations(NUM_BASE, WINDOW_WIDTH, WINDOW_HEIGHT, BORDER);
@@ -321,6 +336,15 @@ int main()
 		glfwPollEvents();
 	}
 
+	// Save output to files
+	std::ofstream file;
+	file.open("result.txt");
+	file << txt.rdbuf();
+	file.close();
+	file.open("result.csv");
+	file << csv.rdbuf();
+	file.close();
+	
 	/* Delete shader */
 	glDeleteProgram(StationPlotterShader);
 	/* Terminate ImGui */
