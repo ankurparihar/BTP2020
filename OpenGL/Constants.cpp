@@ -3,7 +3,7 @@
 bool refresh = true;
 int METHOD = STARTUP_METHOD;
 int K = 0;
-float PICO_BIAS = 2.0;
+float PICO_BIAS = 0.0;
 float MIN_POWER = 2.0;
 bool randomize = true;
 bool printConnections = false;
@@ -22,3 +22,7 @@ float instantThroughput[TIME + 2] = {0.0};
 std::stringstream txt;
 std::stringstream csv;
 int simulationCount = 0;
+
+int PICO_BIAS_INT = 0;
+int PICO_BIAS_MAX = 0;
+double maxBitsTransferred = 0.0;
