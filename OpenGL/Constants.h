@@ -20,7 +20,7 @@ const float MS_R = 1.0f, MS_G = 1.0f, MS_B = 1.0f, MS_A = 1.0f;		// MobileStatio
 
 const int NUM_BASE = 1;
 const int NUM_PICO = 5;
-const int NUM_MOBILE = 75;
+const int NUM_MOBILE = 500;
 
 const float BASE_STATION_RADIUS = 12.0;		// pixels
 const float PICO_STATION_RADIUS = 8.0;		// pixels
