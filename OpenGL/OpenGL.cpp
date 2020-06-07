@@ -237,14 +237,14 @@ int main()
 				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 
 				// Reset histograms
-				for (int i = 0; i < sampleSize; ++i) {
-					// avgThr[i] = 0.0;
-					biasEffect[i] = 0.0;
-					// biasEffectK[0][i] = 0.0;
-					// biasEffectK[1][i] = 0.0;
-					// biasEffectK[2][i] = 0.0;
-					// biasEffectK[3][i] = 0.0;
-				}
+				// for (int i = 0; i < sampleSize; ++i) {
+				// 	// avgThr[i] = 0.0;
+				// 	biasEffect[i] = 0.0;
+				// 	// biasEffectK[0][i] = 0.0;
+				// 	// biasEffectK[1][i] = 0.0;
+				// 	// biasEffectK[2][i] = 0.0;
+				// 	// biasEffectK[3][i] = 0.0;
+				// }
 			}
 
 			/* Remove all connections */

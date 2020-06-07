@@ -137,25 +137,38 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 
 			averageBitsTransferred = totalBitsTransferred / time;
 			// ss << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
-			timeThroughput[time] = (float)averageBitsTransferred;
-			instantThroughput[time] = (float)instantBits;
+			// timeThroughput[time] = (float)averageBitsTransferred;
+			// instantThroughput[time] = (float)instantBits;
 		}
 
-		txt << "average Bits Transferred\tBiasing - (" << PICO_BIAS << ") " << averageBitsTransferred << std::endl;
-		csv << averageBitsTransferred << ',';
-
-		timeThroughput[TIME + 1] = 0.0;
-		instantThroughput[TIME + 1] = 0.0;
-		for (int i = 1; i <= TIME; ++i) {
-			if (timeThroughput[i] > timeThroughput[TIME + 1]) timeThroughput[TIME + 1] = timeThroughput[i];
-			if (instantThroughput[i] > instantThroughput[TIME + 1]) instantThroughput[TIME + 1] = instantThroughput[i];
+		if (averageBitsTransferred > maxBitsTransferred) {
+			maxBitsTransferred = averageBitsTransferred;
+			PICO_BIAS_MAX = PICO_BIAS_INT;
 		}
-		timeThroughput[TIME + 1] *= 1.75;
-		instantThroughput[TIME + 1] *= 1.75;
 
-		biasEffect[(int)(2*PICO_BIAS * 10)] = (float)throughput;
+		// timeThroughput[TIME + 1] = 0.0;
+		// instantThroughput[TIME + 1] = 0.0;
+		// for (int i = 1; i <= TIME; ++i) {
+		// 	if (timeThroughput[i] > timeThroughput[TIME + 1]) timeThroughput[TIME + 1] = timeThroughput[i];
+		// 	if (instantThroughput[i] > instantThroughput[TIME + 1]) instantThroughput[TIME + 1] = instantThroughput[i];
+		// }
+		// timeThroughput[TIME + 1] *= 1.75;
+		// instantThroughput[TIME + 1] *= 1.75;
+		// 
+		// biasEffect[(int)(2*PICO_BIAS * 10)] = (float)averageBitsTransferred;
 		// ss << "Throughput\tBiasing - " << "(" << PICO_BIAS << ") " << throughput << std::endl;
-		METHOD = METHOD_K;
+		if (PICO_BIAS_INT == 10) {
+			txt << "average Bits Transferred\tBiasing - (" << (double)PICO_BIAS_MAX/10 << ") " << maxBitsTransferred << std::endl;
+			csv << maxBitsTransferred << ',';
+			METHOD = METHOD_K;
+			PICO_BIAS = 0;
+			PICO_BIAS_INT = 0;
+			maxBitsTransferred = 0.0;
+		}
+		else {
+			PICO_BIAS_INT++;
+			PICO_BIAS = (double)PICO_BIAS_INT / 10;
+		}
 		refresh = true;
 	}
 	break;
@@ -252,22 +265,22 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 
 				averageBitsTransferred = totalBitsTransferred / time;
 				// ss << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
-				timeThroughput[time] = (float)averageBitsTransferred;
-				instantThroughput[time] = (float)instantBits;
+				// timeThroughput[time] = (float)averageBitsTransferred;
+				// instantThroughput[time] = (float)instantBits;
 			}
 
 			txt << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
 			csv << averageBitsTransferred << ((loop == 3) ? '\n' : ',');
 		}
 		// will show for only last loop
-		timeThroughput[TIME + 1] = 0.0;
-		instantThroughput[TIME + 1] = 0.0;
-		for (int i = 1; i <= TIME; ++i) {
-			if (timeThroughput[i] > timeThroughput[TIME + 1]) timeThroughput[TIME + 1] = timeThroughput[i];
-			if (instantThroughput[i] > instantThroughput[TIME + 1]) instantThroughput[TIME + 1] = instantThroughput[i];
-		}
-		timeThroughput[TIME + 1] *= 1.75;
-		instantThroughput[TIME + 1] *= 1.75;
+		// timeThroughput[TIME + 1] = 0.0;
+		// instantThroughput[TIME + 1] = 0.0;
+		// for (int i = 1; i <= TIME; ++i) {
+		// 	if (timeThroughput[i] > timeThroughput[TIME + 1]) timeThroughput[TIME + 1] = timeThroughput[i];
+		// 	if (instantThroughput[i] > instantThroughput[TIME + 1]) instantThroughput[TIME + 1] = instantThroughput[i];
+		// }
+		// timeThroughput[TIME + 1] *= 1.75;
+		// instantThroughput[TIME + 1] *= 1.75;
 		METHOD = METHOD_BIAS;
 		refresh = true;
 		randomize = true;

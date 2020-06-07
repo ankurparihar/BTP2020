@@ -68,3 +68,7 @@ extern float instantThroughput[TIME + 2];
 extern std::stringstream txt;
 extern std::stringstream csv;
 extern int simulationCount;
+
+extern int PICO_BIAS_INT;
+extern int PICO_BIAS_MAX;
+extern double maxBitsTransferred;
