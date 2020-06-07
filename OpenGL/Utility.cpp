@@ -29,11 +29,11 @@ std::vector<MobileStation> generateMobileStations(int n, int lenght, int width, 
 	std::vector<MobileStation> v(n);
 	for (int id = 1; id <= n; ++id) {
 		v[id - 1] = MobileStation(id, Point<int>(random(border, lenght - 1 - border), random(border, width - 1 - border)) * SCALE);
-		//int s = rand() % (TIME-1) + 1;			// s = [1, TIME-1]
-		//int e = s + 1 + rand() % (TIME - s);	// e = s + 1 + [0, TIME-1-s] => [s+1, TIME]
-		v[id - 1].initial_start_time = 1;
-		v[id - 1].start_time = 1;
-		v[id - 1].end_time = 3600;
+		int s = rand() % (TIME-1) + 1;			// s = [1, TIME-1]
+		int e = s + 1 + rand() % (TIME - s);	// e = s + 1 + [0, TIME-1-s] => [s+1, TIME]
+		v[id - 1].initial_start_time = s;
+		v[id - 1].start_time = s;
+		v[id - 1].end_time = e;
 		v[id - 1].bitrate = 0.0;
 		v[id - 1].interference = INT_MAX;
 	}
@@ -118,6 +118,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 					// Disconnecting the mobile
 					Station* tempStation = mobileStations[i].station;
 					tempStation->disconnect(&mobileStations[i]);
+					connected--;
 					// Correcting the bitrate of connected mobile of current station
 					int sizeOfStation = tempStation->mobileStations.size();
 					for (int itr = 0; itr < sizeOfStation; ++itr) {
@@ -244,6 +245,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 					}
 					if (mobileStations[i].end_time == time && mobileStations[i].connected) {
 						// Disconnecting the mobile
+						connected--;
 						Station* tempStation = mobileStations[i].station;
 						tempStation->disconnect(&mobileStations[i]);
 						int sizeOfStation = tempStation->mobileStations.size();
