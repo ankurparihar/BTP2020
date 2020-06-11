@@ -35,6 +35,7 @@ std::vector<MobileStation> generateMobileStations(int n, int lenght, int width, 
 		v[id - 1].start_time = s;
 		v[id - 1].end_time = e;
 		v[id - 1].bitrate = 0.0;
+		v[id - 1].throughput = 0.0;
 		v[id - 1].interference = INT_MAX;
 	}
 	return v;
@@ -76,6 +77,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 			mobileStations[i].connected = false;
 			mobileStations[i].bitrate = 0.0;
 			mobileStations[i].station = NULL;
+			mobileStations[i].throughput = 0.0;
 			mobileStations[i].interference = INT_MAX;
 		}
 
@@ -111,7 +113,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 						}
 					}
 					else {
-						// if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
+						if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
 					}
 				}
 				if (mobileStations[i].end_time == time && mobileStations[i].connected) {
@@ -133,6 +135,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 			instantBits = 0.0;
 			for (unsigned int i = 0; i < mobileStations.size(); ++i) {
 				instantBits += mobileStations[i].bitrate;
+				mobileStations[i].throughput += mobileStations[i].bitrate;
 			}
 			totalBitsTransferred += instantBits;
 
@@ -145,6 +148,11 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 		if (averageBitsTransferred > maxBitsTransferred) {
 			maxBitsTransferred = averageBitsTransferred;
 			PICO_BIAS_MAX = PICO_BIAS_INT;
+			/*for (unsigned int i = 0; i < NUM_MOBILE; ++i) {
+				mobileThroughput[i][0] = mobileStations[i].initial_start_time;
+				mobileThroughput[i][1] = mobileStations[i].end_time;
+				mobileThroughput[i][2] = mobileStations[i].throughput;
+			}*/
 		}
 
 		// timeThroughput[TIME + 1] = 0.0;
@@ -161,6 +169,12 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 		if (PICO_BIAS_INT == 10) {
 			txt << "average Bits Transferred\tBiasing - (" << (double)PICO_BIAS_MAX/10 << ") " << maxBitsTransferred << std::endl;
 			csv << maxBitsTransferred << ',';
+			// csv2 << "Bias";
+			// for (unsigned int i = 0; i < NUM_MOBILE; ++i) {
+			// 	csv2 << ',' << mobileThroughput[i][2] / (mobileThroughput[i][1] - mobileThroughput[i][0]);
+			// 	simThroughput[4][i] = mobileThroughput[i][2] / (mobileThroughput[i][1] - mobileThroughput[i][0]);
+			// }
+			// csv2 << '\n';
 			METHOD = METHOD_K;
 			PICO_BIAS = 0;
 			PICO_BIAS_INT = 0;
@@ -197,6 +211,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 				mobileStations[i].connected = false;
 				mobileStations[i].bitrate = 0.0;
 				mobileStations[i].station = NULL;
+				mobileStations[i].throughput = 0.0;
 				mobileStations[i].interference = INT_MAX;
 			}
 
@@ -240,7 +255,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 							}
 						}
 						else {
-							// if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
+							if (mobileStations[i].end_time - mobileStations[i].start_time > 1) mobileStations[i].start_time++;
 						}
 					}
 					if (mobileStations[i].end_time == time && mobileStations[i].connected) {
@@ -262,6 +277,7 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 				instantBits = 0.0;
 				for (unsigned int i = 0; i < mobileStations.size(); ++i) {
 					instantBits += mobileStations[i].bitrate;
+					mobileStations[i].throughput += mobileStations[i].bitrate;
 				}
 				totalBitsTransferred += instantBits;
 
@@ -273,6 +289,12 @@ void connect(std::vector<MobileStation>& mobileStations, std::vector<BaseStation
 
 			txt << "average Bits Transferred\tk = " << loop << " - " << averageBitsTransferred << std::endl;
 			csv << averageBitsTransferred << ((loop == 3) ? '\n' : ',');
+			// csv2 << 'K' << loop;
+			// for (unsigned int i = 0; i < NUM_MOBILE; ++i) {
+			// 	csv2 << ',' << mobileStations[i].throughput / (mobileStations[i].end_time - mobileStations[i].initial_start_time);
+			// 	simThroughput[loop][i] = mobileStations[i].throughput / (mobileStations[i].end_time - mobileStations[i].initial_start_time);
+			// }
+			// csv2 << '\n';
 		}
 		// will show for only last loop
 		// timeThroughput[TIME + 1] = 0.0;

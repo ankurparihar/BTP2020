@@ -21,7 +21,10 @@ float instantThroughput[TIME + 2] = {0.0};
 
 std::stringstream txt;
 std::stringstream csv;
+// std::stringstream csv2;
 int simulationCount = 0;
+// double mobileThroughput[NUM_MOBILE][3] = { 0.0 };
+// float simThroughput[5][NUM_MOBILE] = { 0.0 };
 
 int PICO_BIAS_INT = 0;
 int PICO_BIAS_MAX = 0;
