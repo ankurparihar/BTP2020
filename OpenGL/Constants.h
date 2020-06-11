@@ -43,7 +43,7 @@ const int METHOD_BIAS = 0;
 const int METHOD_K = 1;
 const int STARTUP_METHOD = METHOD_BIAS;
 const double BANDWIDTH = 20.0;	// MHz
-const int TIME = 3600;
+const int TIME = 1000;
 
 // Mutable variables
 extern int METHOD;
@@ -67,7 +67,10 @@ extern float instantThroughput[TIME + 2];
 // also cmd.exe has a limit of buffer it can show, so not all data is visible
 extern std::stringstream txt;
 extern std::stringstream csv;
+// extern std::stringstream csv2;
 extern int simulationCount;
+// extern double mobileThroughput[NUM_MOBILE][3];
+// extern float simThroughput[5][NUM_MOBILE];
 
 extern int PICO_BIAS_INT;
 extern int PICO_BIAS_MAX;

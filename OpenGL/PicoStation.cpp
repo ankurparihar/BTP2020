@@ -23,6 +23,7 @@ void PicoStation::disconnect() {
 		mobile->connected = false;
 		mobile->station = NULL;
 		mobile->bitrate = 0.0;
+		mobile->interference = INT_MAX;
 	}
 	mobileStations.clear();
 }

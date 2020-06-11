@@ -541,11 +541,17 @@ void ImGui::ShowDemoWindow(bool* p_open)
 
 	ImGui::Checkbox("print connections", &printConnections);
 	ImGui::Spacing();
-	char maxThroughput[10];
-	snprintf(maxThroughput, 10, "%.2f", timeThroughput[TIME + 1]);
-	ImGui::PlotLines(maxThroughput , timeThroughput, IM_ARRAYSIZE(timeThroughput) - 1, 0, "avg. throughput", 0.0f, timeThroughput[TIME + 1], ImVec2(300, 100));
-	snprintf(maxThroughput, 10, "%.2f", instantThroughput[TIME + 1]);
-	ImGui::PlotLines(maxThroughput, instantThroughput, IM_ARRAYSIZE(instantThroughput) - 1, 0, PER_DEVICE_THROUGHPUT ? "Per dev. inst. throughput" : "inst. throughput", 0.0f, instantThroughput[TIME + 1], ImVec2(300, 100));
+	// char maxThroughput[10];
+	// snprintf(maxThroughput, 10, "%.2f", timeThroughput[TIME + 1]);
+	// ImGui::PlotLines(maxThroughput , timeThroughput, IM_ARRAYSIZE(timeThroughput) - 1, 0, "avg. throughput", 0.0f, timeThroughput[TIME + 1], ImVec2(300, 100));
+	// snprintf(maxThroughput, 10, "%.2f", instantThroughput[TIME + 1]);
+	// ImGui::PlotLines(maxThroughput, instantThroughput, IM_ARRAYSIZE(instantThroughput) - 1, 0, PER_DEVICE_THROUGHPUT ? "Per dev. inst. throughput" : "inst. throughput", 0.0f, instantThroughput[TIME + 1], ImVec2(300, 100));
+	// ImGui::PlotLines("10", simThroughput[4], IM_ARRAYSIZE(simThroughput[4]), 0, "Bias avg", 0.0f, 10, ImVec2(300, 100));
+	// ImGui::PlotLines("10", simThroughput[0], IM_ARRAYSIZE(simThroughput[0]), 0, "K0 avg", 0.0f, 10, ImVec2(300, 100));
+	// ImGui::PlotLines("10", simThroughput[1], IM_ARRAYSIZE(simThroughput[1]), 0, "K1 avg", 0.0f, 10, ImVec2(300, 100));
+	// ImGui::PlotLines("10", simThroughput[2], IM_ARRAYSIZE(simThroughput[2]), 0, "K2 avg", 0.0f, 10, ImVec2(300, 100));
+	// ImGui::PlotLines("10", simThroughput[3], IM_ARRAYSIZE(simThroughput[3]), 0, "K3 avg", 0.0f, 10, ImVec2(300, 100));
+
 
 	// if (METHOD == METHOD_BIAS) {
 	// 	ImGui::PlotLines("Bias Effect Simple", biasEffect, IM_ARRAYSIZE(biasEffect), 0, "throughput", 0.0f, 3000.0f, ImVec2(300, 100));

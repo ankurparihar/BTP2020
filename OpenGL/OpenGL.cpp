@@ -344,6 +344,9 @@ int main()
 	file.open("result.csv");
 	file << csv.rdbuf();
 	file.close();
+	// file.open("mobileThroughput.csv");
+	// file << csv2.rdbuf();
+	// file.close();
 	
 	/* Delete shader */
 	glDeleteProgram(StationPlotterShader);

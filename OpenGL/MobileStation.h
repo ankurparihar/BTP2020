@@ -10,6 +10,7 @@ public:
 	int start_time;
 	int end_time;
 	double bitrate = 0.0;
+	double throughput = 0.0;
 	double interference = INT_MAX;
 
 	MobileStation() {}
