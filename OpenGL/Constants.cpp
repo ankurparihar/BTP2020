@@ -8,8 +8,8 @@ float MIN_POWER = 2.0;
 bool randomize = true;
 bool printConnections = false;
 bool PER_DEVICE_THROUGHPUT = false;
-int BASE_POWER = 1000000;
-int PICO_POWER = 200000;
+int BASE_POWER = 20;	// W
+int PICO_POWER = 12;	// W
 // float avgThr[sampleSize];
 float throughputArray[5] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
 float biasEffect[sampleSize];
